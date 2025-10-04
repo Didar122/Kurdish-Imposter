@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kurdish Imposter - Party Word Game</title>
+    
+    <!-- PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kurdish Imposter">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Theme Backgrounds */
+        .theme-dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .theme-light {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        .theme-modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: modernBg 10s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes modernBg {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            top: 80%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+
+        .screen.scrollable {
+            align-items: flex-start;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .screen.scrollable .container {
+            margin: 20px auto;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #ff3838);
+            color: white;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .players-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+            width: 100%;
+            padding-right: 10px;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 10px;
+        }
+
+        .player-number {
+            width: 30px;
+            height: 30px;
+            background: #4facfe;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .player-name-input {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .word-card {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .word-main {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .word-hint {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .imposter-card {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+        }
+
+        .game-info {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .history-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .history-date {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .word-editor {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: none;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .word-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+
+        .delete-btn {
+            background: #fa709a;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
+        .theme-btn {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn.active {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .theme-dark-btn { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+        .theme-light-btn { background: linear-gradient(135deg, #f5f7fa, #c3cfe2); }
+        .theme-modern-btn { background: linear-gradient(135deg, #667eea, #764ba2); }
+
+        /* Score Section */
+        .score-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .score-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .score-input {
+            width: 80px;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Splash Screen */
+        .splash-logo {
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            margin: 0 auto 30px;
+            border: 3px solid rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            background-image: url('splash.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .splash-logo.no-image {
+            background-image: none;
+        }
+
+        .splash-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .splash-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Game Icon Animation */
+        .game-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px auto;
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .game-icon::before {
+            content: '🎭';
+            font-size: 60px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Tap Animation Effects */
+        .tap-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tap-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .tap-bounce {
+            animation: tapBounce 0.3s ease-out;
+        }
+
+        @keyframes tapBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .word-main {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="theme-modern">
+    <!-- Floating Shapes for Modern Theme -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    <!-- Splash Screen -->
+    <div class="screen active" id="splashScreen">
+        <div class="splash-logo" id="splashLogo">🎭</div>
+        <h1 class="splash-title">Kurdish Imposter</h1>
+        <p class="splash-subtitle">Party Word Game</p>
+        <div class="loading"></div>
+    </div>
+
+    <!-- Main Menu -->
+    <div class="screen" id="mainMenu">
+        <div class="container">
+            <div class="game-icon"></div>
+            <h1 class="title">Kurdish Imposter</h1>
+            <button class="btn btn-primary" onclick="showGameSetup()">Start Game</button>
+            <button class="btn btn-secondary" onclick="showSettings()">Settings</button>
+            <button class="btn" onclick="showHistory()">Game History</button>
+        </div>
+    </div>
+
+    <!-- Game Setup -->
+    <div class="screen" id="gameSetup">
+        <button class="back-btn" onclick="showMainMenu()">← Back</button>
+        <div class="container">
+            <h2 class="title">Game Setup</h2>
+            
+            <div class="input-group">
+                <label>Number of Players:</label>
+                <input type="number" id="playerCount" min="3" max="20" value="5" onchange="updatePlayersList()">
+            </div>
+            
+            <div class="input-group">
+                <label>Number of Imposters:</label>
+                <input type="number" id="imposterCount" min="1" max="5" value="1">
+            </div>
+
+            <div class="input-group">
+                <label>Player Names:</label>
+                <div class="players-list" id="playersList"></div>
+            </div>
+
+
+            
+            <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="screen" id="gameScreen">
+        <div class="container">
+            <div class="game-info">
+                <span id="currentPlayerName">Player 1</span> (<span id="currentPlayerNum">1</span> / <span id="totalPlayers">5</span>)
+            </div>
+            
+            <div class="word-card" id="wordCard">
+                <div class="word-main" id="wordMain">Tap to reveal</div>
+                <div class="word-hint" id="wordHint">Your role</div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="revealWord()" id="revealBtn">Tap to See Your Role</button>
+            
+            <div id="gameNavigation" style="display: none;">
+                <button class="btn btn-secondary" onclick="nextPlayer()" id="nextBtn">Next Player</button>
+            </div>
+
+            <!-- Score Section -->
+            <div class="score-section" id="scoreSection" style="display: none;">
+                <h3 style="text-align: center; margin-bottom: 15px;">Enter Player Scores</h3>
+                <div class="score-inputs" id="scoreInputs"></div>
+                <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="nextRound()" style="flex: 1;">Next Round</button>
+                    <button class="btn btn-danger" onclick="endGame()" style="flex: 1;">End Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="screen scrollable" id="settingsScreen">
+        <button class="back-btn" onclick="showMainMenu()">← Back</button>
+        <div class="container">
+            <h2 class="title">Settings</h2>
+            
+            <div class="input-group">
+                <label>Language:</label>
+                <select id="languageSelect" onchange="changeLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="ku">Kurdish-Sorani</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Theme:</label>
+                <div class="theme-selector">
+                    <div class="theme-btn theme-dark-btn" onclick="changeTheme('dark')" title="Dark Theme"></div>
+                    <div class="theme-btn theme-light-btn" onclick="changeTheme('light')" title="Light Theme"></div>
+                    <div class="theme-btn theme-modern-btn active" onclick="changeTheme('modern')" title="Modern Theme"></div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="toggleWordEditor()">Edit Words</button>
+            <button class="btn btn-secondary" onclick="openMoreGames()">More Games</button>
+            <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+            <button class="btn btn-secondary" onclick="showAbout()">About</button>
+            
+            <div class="word-editor" id="wordEditor">
+                <h3>Word Database</h3>
+                
+                <div class="input-group">
+                    <label>English Word:</label>
+                    <input type="text" id="newWordEn" placeholder="Enter English word">
+                </div>
+                
+                <div class="input-group">
+                    <label>Kurdish Word:</label>
+                    <input type="text" id="newWordKu" placeholder="وشەی کوردی بنووسە">
+                </div>
+                
+                <div class="input-group">
+                    <label>English Hint:</label>
+                    <input type="text" id="newHintEn" placeholder="Enter English hint">
+                </div>
+                
+                <div class="input-group">
+                    <label>Kurdish Hint:</label>
+                    <input type="text" id="newHintKu" placeholder="ئاماژەی کوردی بنووسە">
+                </div>
+                
+                <button class="btn btn-primary" onclick="addNewWord()">Add Word</button>
+                
+                <div class="word-list" id="wordList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game History -->
+    <div class="screen" id="historyScreen">
+        <button class="back-btn" onclick="showMainMenu()">← Back</button>
+        <div class="container">
+            <h2 class="title">Game History</h2>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- About -->
+    <div class="screen" id="aboutScreen">
+        <button class="back-btn" onclick="showSettings()">← Back</button>
+        <div class="container">
+            <h2 class="title">About</h2>
+            <p><strong>Kurdish Imposter</strong></p>
+            <p>Version: 1.0.17</p>
+            <p>Developer: Didar Baxtear</p>
+            <p>An exciting party word game where players try to identify the imposters among them!</p>
+        </div>
+    </div>
+
+    <!-- Custom Word Dialog for Next Round -->
+    <div class="screen" id="customWordDialog" style="background: rgba(0,0,0,0.8);">
+        <div class="container" style="max-width: 400px;">
+            <h3 style="margin-bottom: 20px;">Round 2 - Choose Word</h3>
+            <p style="margin-bottom: 20px;">Would you like to use a custom word for the next round?</p>
+            
+            <div class="input-group">
+                <label>Custom Word:</label>
+                <input type="text" id="dialogCustomWord" placeholder="Enter custom word" style="width: 100%; padding: 12px; border: none; border-radius: 10px; box-sizing: border-box;">
+            </div>
+            
+            <div class="input-group">
+                <label>Hint:</label>
+                <input type="text" id="dialogCustomHint" placeholder="Enter hint for the word" style="width: 100%; padding: 12px; border: none; border-radius: 10px; box-sizing: border-box;">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="useCustomWordNextRound()" style="flex: 1;">Use Custom Word</button>
+                <button class="btn btn-secondary" onclick="useRandomWordNextRound()" style="flex: 1;">Use Random Word</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Dialog -->
+    <div class="screen" id="confirmDialog" style="background: rgba(0,0,0,0.8);">
+        <div class="container" style="max-width: 350px;">
+            <h3 style="margin-bottom: 20px;">⚠️ Clear All Data</h3>
+            <p style="margin-bottom: 30px;">Are you sure you want to clear all game history and settings? This cannot be undone!</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-danger" onclick="confirmClearData()" style="flex: 1;">Yes, Clear All</button>
+                <button class="btn" onclick="cancelClearData()" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            players: 5,
+            imposters: 1,
+            currentPlayer: 1,
+            playerNames: [],
+            playerRoles: [],
+            wordRevealed: false,
+            playerScores: [],
+            roundNumber: 1
+        };
+
+        // Word database
+        let wordDatabase = [
+    { word: { en: "Pizza", ku: "پیتزا" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Ocean", ku: "زەریا" }, "hint": { en: "Water", ku: "ئاو" } },
+    { word: { en: "Guitar", ku: "گیتار" }, "hint": { en: "Music", ku: "مۆسیقا" } },
+    { word: { en: "Hospital", ku: "نەخۆشخانە" }, "hint": { en: "Health", ku: "تەندروستی" } },
+    { word: { en: "School", ku: "قوتابخانە" }, "hint": { en: "Education", ku: "پەروەردە" } },
+    { word: { en: "Car", ku: "ئۆتۆمبێل" }, "hint": { en: "Transport", ku: "گواستنەوە" } },
+    { word: { en: "Book", ku: "کتێب" }, "hint": { en: "Reading", ku: "خوێندنەوە" } },
+    { word: { en: "Mountain", ku: "چیا" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Phone", ku: "تەلەفۆن" }, "hint": { en: "Communication", ku: "پەیوەندی" } },
+    { word: { en: "Coffee", ku: "قاوە" }, "hint": { en: "Drink", ku: "خواردنەوە" } },
+    { word: { en: "Man", ku: "پیاو" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Woman", ku: "ژن" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Child", ku: "منداڵ" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Father", ku: "باوک" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Mother", ku: "دایک" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Brother", ku: "برا" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Sister", ku: "خوشک" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Friend", ku: "هاوڕێ" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Teacher", ku: "مامۆستا" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Doctor", ku: "دکتۆر" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Student", ku: "قوتابی" }, "hint": { en: "Education", ku: "پەروەردە" } },
+    { word: { en: "Baby", ku: "ساوا" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Grandfather", ku: "باپیر" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Grandmother", ku: "دایەگەورە" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Neighbor", ku: "دراوسێ" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Stranger", ku: "بێگانە" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Engineer", ku: "ئەندازیار" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Pilot", ku: "فڕۆکەوان" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Soldier", ku: "سەرباز" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Cook/Chef", ku: "چێشتلێنەر" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Husband", ku: "مێرد" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Wife", ku: "ژن" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Cousin (Male)", ku: "کوڕە مام / خاڵ" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Uncle (Paternal)", ku: "مام" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Aunt (Maternal)", ku: "خاڵۆژن" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Boss", ku: "سەرۆک" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Politician", ku: "سیاسەتمەدار" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Journalist", ku: "ڕۆژنامەنووس" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Waiter", ku: "خزمەتکار" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Athlete", ku: "وەرزشکار" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Artist/Painter", ku: "هونەرمەند" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Lawyer", ku: "پارێزەر" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Firefighter", ku: "ئاگرکوژێنەر" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Police Officer", ku: "پۆلیس" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "King/Ruler", ku: "پاشا" }, "hint": { en: "Title", ku: "نازناو" } },
+    { word: { en: "Queen", ku: "شاژن" }, "hint": { en: "Title", ku: "نازناو" } },
+    { word: { en: "Crowd", ku: "قەرەباڵغی" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Customer", ku: "کریار" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Guest", ku: "میوان" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Manager", ku: "بەڕێوەبەر" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Hero", ku: "پاڵەوان" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Villain", ku: "خراپەکار" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Citizen", ku: "هاووڵاتی" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Refugee", ku: "پەنابەر" }, "hint": { en: "People", ku: "کەس" } },
+    { word: { en: "Actor", ku: "ئەکتەر" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Musician", ku: "مۆسیقاژەن" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Philosopher", ku: "فەیلەسوف" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Poet", ku: "شاعیر" }, "hint": { en: "Profession", ku: "پیشە" } },
+    { word: { en: "Daughter", ku: "کچ" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Son", ku: "کوڕ" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Niece/Nephew", ku: "برازا / خوشکەزا" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "Relative", ku: "خزم" }, "hint": { en: "Family", ku: "خێزان" } },
+    { word: { en: "House", ku: "ماڵ / خانوو" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Room", ku: "ژوور" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Door", ku: "دەرگا" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Window", ku: "پەنجەرە" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Table", ku: "مێز" }, "hint": { en: "Furniture", ku: "مۆبیلیات" } },
+    { word: { en: "Chair", ku: "کورسی" }, "hint": { en: "Furniture", ku: "مۆبیلیات" } },
+    { word: { en: "Bed", ku: "سیسەم" }, "hint": { en: "Furniture", ku: "مۆبیلیات" } },
+    { word: { en: "Key", ku: "کلیل" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "City", ku: "شار" }, "hint": { en: "Place", ku: "شوێن" } },
+    { word: { en: "Park", ku: "پارک" }, "hint": { en: "Place", ku: "شوێن" } },
+    { word: { en: "Library", ku: "کتێبخانە" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Kitchen", ku: "چێشتخانە" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Garden", ku: "باخچە" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Street", ku: "شەقام" }, "hint": { en: "Place", ku: "شوێن" } },
+    { word: { en: "Office", ku: "ئۆفیس" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Shop/Store", ku: "دوکان" }, "hint": { en: "Place", ku: "شوێن" } },
+    { word: { en: "Market", ku: "بازاڕ" }, "hint": { en: "Place", ku: "شوێن" } },
+    { word: { en: "Floor (Ground)", ku: "زەوی" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Stairs", ku: "قادرمە" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Sofa/Couch", ku: "قەنەفە" }, "hint": { en: "Furniture", ku: "مۆبیلیات" } },
+    { word: { en: "Rug/Carpet", ku: "فەرش" }, "hint": { en: "Furniture", ku: "مۆبیلیات" } },
+    { word: { en: "Curtain", ku: "پەردە" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Pillow", ku: "سەرین" }, "hint": { en: "Furniture", ku: "مۆبیلیات" } },
+    { word: { en: "Cabinet", ku: "کابینە" }, "hint": { en: "Furniture", ku: "مۆبیلیات" } },
+    { word: { en: "Balcony", ku: "باڵکۆن" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Basement", ku: "ژێرزەمین" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Apartment", ku: "شوقە" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Palace", ku: "کۆشک" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Castle", ku: "قەڵا" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Tent", ku: "چادر" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Vase", ku: "گوڵدان" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Picture Frame", ku: "چوارچێوەی وێنە" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Candle", ku: "مۆم" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Hotel", ku: "هۆتێل" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Restaurant", ku: "چێشتخانە" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Theater", ku: "شانۆ" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Stadium", ku: "یاریگا" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Mosque", ku: "مزگەوت" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Church", ku: "کەنیسە" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Factory", ku: "کارگە" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Attic", ku: "سەربان" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Water", ku: "ئاو" }, "hint": { en: "Drink", ku: "خواردنەوە" } },
+    { word: { en: "Bread", ku: "نان" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Milk", ku: "شیر" }, "hint": { en: "Drink", ku: "خواردنەوە" } },
+    { word: { en: "Meat", ku: "گۆشت" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Apple", ku: "سێو" }, "hint": { en: "Fruit", ku: "میوە" } },
+    { word: { en: "Orange (Fruit)", ku: "پڕتەقاڵ" }, "hint": { en: "Fruit", ku: "میوە" } },
+    { word: { en: "Salt", ku: "خوێ" }, "hint": { en: "Spice", ku: "بەهارات" } },
+    { word: { en: "Sugar", ku: "شەکر" }, "hint": { en: "Ingredient", ku: "پێکهاتە" } },
+    { word: { en: "Tea", ku: "چا" }, "hint": { en: "Drink", ku: "خواردنەوە" } },
+    { word: { en: "Egg", ku: "هێلکە" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Rice", ku: "برنج" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Cheese", ku: "پەنیر" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Honey", ku: "هەنگوین" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Flour", ku: "ئارد" }, "hint": { en: "Ingredient", ku: "پێکهاتە" } },
+    { word: { en: "Butter", ku: "کەرە" }, "hint": { en: "Ingredient", ku: "پێکهاتە" } },
+    { word: { en: "Cake", ku: "کێک" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Soup", ku: "شۆربا" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Grape", ku: "ترێ" }, "hint": { en: "Fruit", ku: "میوە" } },
+    { word: { en: "Fish (Food)", ku: "ماسی" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Vegetable", ku: "سەوزە" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Chicken (Food)", ku: "گۆشتی مریشک" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Potato", ku: "پەتاتە" }, "hint": { en: "Vegetable", ku: "سەوزە" } },
+    { word: { en: "Tomato", ku: "تەماتە" }, "hint": { en: "Vegetable", ku: "سەوزە" } },
+    { word: { en: "Onion", ku: "پیاز" }, "hint": { en: "Vegetable", ku: "سەوزە" } },
+    { word: { en: "Garlic", ku: "سیر" }, "hint": { en: "Vegetable", ku: "سەوزە" } },
+    { word: { en: "Salad", ku: "زەڵاتە" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Yogurt", ku: "ماست" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Juice", ku: "شەربەت" }, "hint": { en: "Drink", ku: "خواردنەوە" } },
+    { word: { en: "Beer", ku: "بیرە" }, "hint": { en: "Drink", ku: "خواردنەوە" } },
+    { word: { en: "Wine", ku: "شەراب" }, "hint": { en: "Drink", ku: "خواردنەوە" } },
+    { word: { en: "Chocolate", ku: "شوکولاتە" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Cookie", ku: "کێکی بچووک" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Ice Cream", ku: "گولێنە" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Sandwich", ku: "ساندویچ" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Pasta", ku: "پاستا" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Lemon", ku: "لیمۆ" }, "hint": { en: "Fruit", ku: "میوە" } },
+    { word: { en: "Banana", ku: "مۆز" }, "hint": { en: "Fruit", ku: "میوە" } },
+    { word: { en: "Cucumber", ku: "خەیار" }, "hint": { en: "Vegetable", ku: "سەوزە" } },
+    { word: { en: "Pepper (Spice)", ku: "بیبەر" }, "hint": { en: "Spice", ku: "بەهارات" } },
+    { word: { en: "Vinegar", ku: "سرکە" }, "hint": { en: "Ingredient", ku: "پێکهاتە" } },
+    { word: { en: "Oil (Cooking)", ku: "زەیت" }, "hint": { en: "Ingredient", ku: "پێکهاتە" } },
+    { word: { en: "Grill/BBQ", ku: "کباب" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Dough", ku: "هەویر" }, "hint": { en: "Ingredient", ku: "پێکهاتە" } },
+    { word: { en: "Sausage", ku: "سجق" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Jam", ku: "مورەبا" }, "hint": { en: "Food", ku: "خواردن" } },
+    { word: { en: "Syrup", ku: "شیلە" }, "hint": { en: "Ingredient", ku: "پێکهاتە" } },
+    { word: { en: "Oven", ku: "فڕن" }, "hint": { en: "Kitchenware", ku: "خواردن" } },
+    { word: { en: "Kettle", ku: "غەوری" }, "hint": { en: "Kitchenware", ku: "خواردن" } },
+    { word: { en: "Sun", ku: "خۆر" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Moon", ku: "مانگ" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Star", ku: "ئەستێرە" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Air", ku: "هەوا" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Fire", ku: "ئاگر" }, "hint": { en: "Element", ku: "توخم" } },
+    { word: { en: "Tree", ku: "دار" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Flower", ku: "گوڵ" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Rain", ku: "باران" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Snow", ku: "بەفر" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Wind", ku: "با" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Cloud", ku: "هەور" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "River", ku: "ڕووبار" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Lake", ku: "دەریاچە" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Stone", ku: "بەرد" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Earth/Ground", ku: "زەوی" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Grass", ku: "گیا" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Desert", ku: "بیابان" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Fog", ku: "تەم" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Ice", ku: "بەستەڵەک" }, "hint": { en: "Element", ku: "توخم" } },
+    { word: { en: "Dust", ku: "تۆز" }, "hint": { en: "Element", ku: "توخم" } },
+    { word: { en: "Valley", ku: "دۆڵ" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Forest", ku: "دارستان" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Cave", ku: "ئەشکەوت" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Volcano", ku: "گڕکان" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Tornado", ku: "گەردەلول" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Lightning", ku: "هەورەبروسکە" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Thunder", ku: "هەورەگرمە" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Wave", ku: "شەپۆل" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Sand", ku: "خۆڵ" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Soil", ku: "خاک" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Pebble", ku: "چەو" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Island", ku: "دوورگە" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Peninsula", ku: "نیمچە دوورگە" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Jungle", ku: "جەنگەڵ" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Swamp", ku: "زەلکاو" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Waterfall", ku: "تاڤگە" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Rainbow", ku: "پەلکەزێڕینە" }, "hint": { en: "Weather", ku: "کەش و هەوا" } },
+    { word: { en: "Galaxy", ku: "گەردوون" }, "hint": { en: "Space", ku: "گەردوون" } },
+    { word: { en: "Planet", ku: "هەسارە" }, "hint": { en: "Space", ku: "گەردوون" } },
+    { word: { en: "Comet", ku: "کلکدار" }, "hint": { en: "Space", ku: "گەردوون" } },
+    { word: { en: "Steam/Vapor", ku: "هەڵم" }, "hint": { en: "Element", ku: "توخم" } },
+    { word: { en: "Coal", ku: "خەڵوز" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Crystal", ku: "کریستاڵ" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Mud", ku: "قوڕ" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Petroleum", ku: "نەوت" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Dog", ku: "سەگ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Cat", ku: "پشیلە" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Bird", ku: "باڵندە" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Cow", ku: "مانگا" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Horse", ku: "ئەسپ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Lion", ku: "شێر" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Snake", ku: "مار" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Tiger", ku: "پڵنگ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Mouse", ku: "مشک" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Sheep", ku: "مەڕ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Goat", ku: "بزن" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Chicken", ku: "مریشک" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Elephant", ku: "فیل" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Wolf", ku: "گورگ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Bear", ku: "ورچ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Rabbit", ku: "کەروێشک" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Donkey", ku: "کەر" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Spider", ku: "جاڵجاڵۆکە" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Dolphin", ku: "دەڵفین" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Whale", ku: "نەهەنگ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Shark", ku: "قڕش" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Crocodile", ku: "تیمساح" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Kangaroo", ku: "کەنگەر" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Panda", ku: "پاندا" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Giraffe", ku: "زەڕافە" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Eagle", ku: "هەڵۆ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Ostrich", ku: "نەعامە" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Fox", ku: "ڕێوی" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Deer", ku: "ئاسک" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Monkey", ku: "مەیموون" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Frog", ku: "بۆق" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Turtle", ku: "کیسەڵ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Bee", ku: "هەنگ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Ant", ku: "مێروولە" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Butterfly", ku: "پەپوولە" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Worm", ku: "کرم" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Camel", ku: "وشتر" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Pigeon", ku: "کۆتر" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Owl", ku: "کوندەپەپوو" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Penguin", ku: "بەتریق" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Hedgehog", ku: "ژیشک" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Otter", ku: "سەگاو" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Flamingo", ku: "فلامینگۆ" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Scorpion", ku: "دووپشک" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Octopus", ku: "ئەختەبوت" }, "hint": { en: "Animal", ku: "ئاژەڵ" } },
+    { word: { en: "Shakespeare", ku: "شکسپیر" }, "hint": { en: "Writer", ku: "نووسەر" } },
+    { word: { en: "Einstein", ku: "ئاینشتاین" }, "hint": { en: "Scientist", ku: "زانستڤان" } },
+    { word: { en: "Cleopatra", ku: "کلیۆپاترا" }, "hint": { en: "Queen", ku: "شاژن" } },
+    { word: { en: "Buddha", ku: "بوودا" }, "hint": { en: "Philosopher", ku: "فەیلەسوف" } },
+    { word: { en: "Sherlock Holmes", ku: "شێرلاک هۆڵمز" }, "hint": { en: "Fictional Character", ku: "کەسایەتی خەیاڵی" } },
+    { word: { en: "Dracula", ku: "دراکیولا" }, "hint": { en: "Fictional Character", ku: "کەسایەتی خەیاڵی" } },
+    { word: { en: "Genghis Khan", ku: "جەنگیزخان" }, "hint": { en: "Leader", ku: "سەرکردە" } },
+    { word: { en: "Beethoven", ku: "بیتھۆڤن" }, "hint": { en: "Composer", ku: "ئاوازدانەر" } },
+    { word: { en: "Plato", ku: "ئەفلاتوون" }, "hint": { en: "Philosopher", ku: "فەیلەسوف" } },
+    { word: { en: "Picasso", ku: "پیکاسۆ" }, "hint": { en: "Painter", ku: "نیگارکێش" } },
+    { word: { en: "Queen Elizabeth", ku: "شاژنە ئەلیزابێس" }, "hint": { en: "Monarch", ku: "شاهانە" } },
+    { word: { en: "Mickey Mouse", ku: "میکی ماوس" }, "hint": { en: "Cartoon", ku: "کارتۆن" } },
+    { word: { en: "Homer Simpson", ku: "هۆمەر سیمپسۆن" }, "hint": { en: "Cartoon", ku: "کارتۆن" } },
+    { word: { en: "Newton", ku: "نیوتن" }, "hint": { en: "Scientist", ku: "زانستڤان" } },
+    { word: { en: "Pharaoh", ku: "فیرعەون" }, "hint": { en: "Pharaoh", ku: "شاهانە" } },
+    { word: { en: "James Bond", ku: "جەیمس بۆند" }, "hint": { en: "Fictional Character", ku: "کەسایەتی خەیاڵی" } },
+    { word: { en: "Harry Potter (Character)", ku: "هاری پۆتەر" }, "hint": { en: "Fictional Character", ku: "کەسایەتی خەیاڵی" } },
+    { word: { en: "Stephen King", ku: "ستیڤن کینگ" }, "hint": { en: "Writer", ku: "نووسەر" } },
+    { word: { en: "Nelson Mandela", ku: "نێڵسن ماندێلا" }, "hint": { en: "Leader", ku: "سەرکردە" } },
+    { word: { en: "Oprah", ku: "ئۆپرا" }, "hint": { en: "Media Personality", ku: "کەسایەتی میدیا" } },
+    { word: { en: "Jack Sparrow", ku: "جاک سپارۆ" }, "hint": { en: "Fictional Character", ku: "کەسایەتی خەیاڵی" } },
+    { word: { en: "Saladin", ku: "سەلاحەدین" }, "hint": { en: "Historical Leader", ku: "سەرکردەی مێژوویی" } },
+    { word: { en: "Nalî", ku: "نالی" }, "hint": { en: "Kurdish Poet", ku: "شیعر" } },
+    { word: { en: "Goran", ku: "گۆران" }, "hint": { en: "Kurdish Poet", ku: "شیعر" } },
+    { word: { en: "Mustafa Barzani", ku: "مەلا مستەفا بارزانی" }, "hint": { en: "Political Leader", ku: "سەرکردەی سیاسی" } },
+    { word: { en: "Jalal Talabani", ku: "جەلال تاڵەبانی" }, "hint": { en: "Political Leader", ku: "سەرکردەی سیاسی" } },
+    { word: { en: "Ibrahim Khalil", ku: "ئیبراھیم خەلیل" }, "hint": { en: "Musician", ku: "مۆسیقاژەن" } },
+    { word: { en: "Mala-i Jiziri", ku: "مەلای جزیری" }, "hint": { en: "Kurdish Poet", ku: "شیعر" } },
+    { word: { en: "Cegerxwîn", ku: "جگەرخوێن" }, "hint": { en: "Kurdish Poet", ku: "شیعر" } },
+    { word: { en: "Sherko Bekas", ku: "شێرکۆ بێکەس" }, "hint": { en: "Kurdish Poet", ku: "شیعر" } },
+    { word: { en: "Hasan Zirek", ku: "حەسەن زیرەک" }, "hint": { en: "Singer", ku: "گۆرانیبێژ" } },
+    { word: { en: "Adnan Karim", ku: "عەدنان کەریم" }, "hint": { en: "Singer", ku: "گۆرانیبێژ" } },
+    { word: { en: "Dildar", ku: "دڵدار" }, "hint": { en: "Poet (Author of Ey Reqib)", ku: "شاعیر" } },
+    { word: { en: "Chopy Fatah", ku: "چۆپی فەتاح" }, "hint": { en: "Kurdish Singer", ku: "گۆرانیبێژ" } },
+    { word: { en: "Qazi Muhammad", ku: "قازی محەمەد" }, "hint": { en: "Political Leader", ku: "سەرکردەی سیاسی" } },
+    { word: { en: "Abdullah Öcalan", ku: "عەبدوڵڵا ئۆجەلان" }, "hint": { en: "Political Leader", ku: "سەرکردەی سیاسی" } },
+    { word: { en: "Hemn (Muhammad Amin Sheikho)", ku: "هێمن" }, "hint": { en: "Poet", ku: "شاعیر" } },
+    { word: { en: "Newroz", ku: "نەورۆز" }, "hint": { en: "Kurdish New Year", ku: "مانگ" } },
+    { word: { en: "Kurdistan (Region)", ku: "کوردستان" }, "hint": { en: "Region/Homeland", ku: "خۆر" } },
+    { word: { en: "Duhok (City)", ku: "دهۆک" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Erbil (City)", ku: "هەولێر" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Sulaymaniyah (City)", ku: "سلێمانی" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Kermanshah (City)", ku: "کرماشان" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Diyarbekir (City)", ku: "ئامەد" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Mahabad (City)", ku: "مەهاباد" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Kirkuk (City)", ku: "کەرکوک" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Zardasht (Zoroaster)", ku: "زەردەشت" }, "hint": { en: "Prophet", ku: "پێغەمبەر" } },
+    { word: { en: "Soran (Emirate/Dialect)", ku: "سۆران" }, "hint": { en: "Place/Dialect", ku: "شوێن" } },
+    { word: { en: "Badinan (Region/Dialect)", ku: "بادینان" }, "hint": { en: "Place/Dialect", ku: "شوێن" } },
+    { word: { en: "Hawraman (Region)", ku: "هەورامان" }, "hint": { en: "Place/Culture", ku: "شوێن" } },
+    { word: { en: "Kurmanji (Dialect)", ku: "کورمانجی" }, "hint": { en: "Kurdish Dialect", ku: "زمان" } },
+    { word: { en: "Sorani (Dialect)", ku: "سۆرانی" }, "hint": { en: "Kurdish Dialect", ku: "زمان" } },
+    { word: { en: "Eiffel Tower", ku: "بورجی ئیفڵ" }, "hint": { en: "Landmark", ku: "نیشانە" } },
+    { word: { en: "Pyramids", ku: "ئەهرامەکان" }, "hint": { en: "Structure", ku: "بیناسازی" } },
+    { word: { en: "China Great Wall", ku: "شورای چین" }, "hint": { en: "Structure", ku: "بیناسازی" } },
+    { word: { en: "Mount Everest", ku: "چیای ئێڤەرست" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Amazon River", ku: "ڕووباری ئەمازۆن" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Desert", ku: "بیابان" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Hollywood", ku: "هۆلیوود" }, "hint": { en: "Place", ku: "شوێن" } },
+    { word: { en: "Statue of Liberty", ku: "پەیکەری ئازادی" }, "hint": { en: "Landmark", ku: "نیشانە" } },
+    { word: { en: "Jerusalem", ku: "قودس" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Mecca", ku: "مەککە" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Niagara Falls", ku: "تاڤگەی نایەگرا" }, "hint": { en: "Nature", ku: "سروشت" } },
+    { word: { en: "Dubai Burj Khalifa", ku: "بورج خەلیفە" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "The Vatican", ku: "ڤاتیکان" }, "hint": { en: "City/State", ku: "شار/وڵات" } },
+    { word: { en: "Hiroshima", ku: "هێرۆشیما" }, "hint": { en: "City", ku: "شار" } },
+    { word: { en: "Area 51", ku: "ناوچەی ٥١" }, "hint": { en: "Place", ku: "شوێن" } },
+    { word: { en: "The White House", ku: "کۆشکی سپی" }, "hint": { en: "Building", ku: "بینا" } },
+    { word: { en: "Superman", ku: "سوپەرمان" }, "hint": { en: "Superhero", ku: "سور" } },
+    { word: { en: "Batman", ku: "باتمان" }, "hint": { en: "Superhero", ku: "ڕەش" } },
+    { word: { en: "Spiderman", ku: "سپایدەرمان" }, "hint": { en: "Superhero", ku: "جاڵجاڵۆکە" } },
+    { word: { en: "Iron Man", ku: "ئایرۆن مان" }, "hint": { en: "Superhero", ku: "کارەبا" } },
+    { word: { en: "Captain America", ku: "کاپتن ئەمریکا" }, "hint": { en: "Superhero", ku: "کاپتن" } },
+    { word: { en: "Scooby-Doo", ku: "سکووبی دوو" }, "hint": { en: "Cartoon", ku: "کارتۆن" } },
+    { word: { en: "SpongeBob", ku: "سپۆنج بۆب" }, "hint": { en: "Cartoon", ku: "کارتۆن" } },
+    { word: { en: "Pikachu", ku: "پیکاچوو" }, "hint": { en: "Cartoon", ku: "کارتۆن" } },
+    { word: { en: "Optimus Prime", ku: "ئۆپتیموس پرایم" }, "hint": { en: "Cartoon", ku: "کارتۆن" } },
+    { word: { en: "The Hulk", ku: "هالک" }, "hint": { en: "Superhero", ku: "توڕە" } },
+    { word: { en: "Goku", ku: "گۆکو" }, "hint": { en: "Anime Character", ku: "کلک" } },
+    { word: { en: "Shrek", ku: "شرێک" }, "hint": { en: "Cartoon Character", ku: "سەوز" } },
+    { word: { en: "Harry Potter (Character)", ku: "هاری پۆتەر" }, "hint": { en: "Fictional Character", ku: "دار" } },
+    { word: { en: "The Joker", ku: "جۆکەر ( کارەکتەر )" }, "hint": { en: "Villain", ku: "شێت" } },
+    { word: { en: "Aquaman", ku: "ئاکوامان" }, "hint": { en: "Superhero", ku: "سووپەرهیرۆ" } },
+    { word: { en: "Naruto", ku: "ناروتۆ" }, "hint": { en: "Anime Character", ku: "ئەنیمێ" } },
+    { word: { en: "Tom and Jerry", ku: "تۆم و جێری" }, "hint": { en: "Cartoon", ku: "کارتۆن" } },
+    { word: { en: "Simba", ku: "سیمبا" }, "hint": { en: "Cartoon Character", ku: "کەسایەتی کارتۆن" } },
+    { word: { en: "Luffy", ku: "لۆفی" }, "hint": { en: "Anime Character", ku: "کەسایەتی ئەنیمێ" } },
+    { word: { en: "Wolverine", ku: "وۆڵڤەرین" }, "hint": { en: "Superhero", ku: "سووپەرهیرۆ" } },
+    { word: { en: "Dragon", ku: "ئەژدیها" }, "hint": { en: "Mythical Creature", ku: "بوونەوەری ئەفسانەیی" } },
+    { word: { en: "Bigfoot", ku: "بیگفووت" }, "hint": { en: "Legendary Creature", ku: "بوونەوەری ئەفسانەیی" } },
+    { word: { en: "Godzilla", ku: "گۆدزیلا" }, "hint": { en: "Fictional Monster", ku: "دڕندەی خەیاڵی" } },
+    { word: { en: "King Kong", ku: "کینگ کۆنگ" }, "hint": { en: "Fictional Monster", ku: "دڕندەی خەیاڵی" } },
+    { word: { en: "Vampire", ku: "خوێنمژ" }, "hint": { en: "Fictional Creature", ku: "بوونەوەری خەیاڵی" } },
+    { word: { en: "Zombie", ku: "زۆمبی" }, "hint": { en: "Fictional Creature", ku: "بوونەوەری خەیاڵی" } },
+    { word: { en: "T-Rex", ku: "تی ڕێکس" }, "hint": { en: "Dinosaur", ku: "کۆن" } },
+    { word: { en: "Mammoth", ku: "مامۆس" }, "hint": { en: "Extinct Animal", ku: "شاخ" } },
+    { word: { en: "Ghoul", ku: "غول" }, "hint": { en: "Mythical Creature", ku: "بوونەوەری ئەفسانەیی" } },
+    { word: { en: "Titanic", ku: "تایتانیک" }, "hint": { en: "Ship", ku: "سارد" } },
+    { word: { en: "The Internet", ku: "ئینتەرنێت" }, "hint": { en: "Technology", ku: "پەیوەندی" } },
+    { word: { en: "DNA", ku: "دی ئێن ئەی" }, "hint": { en: "Molecule", ku: "بچوک" } },
+    { word: { en: "Jeep", ku: "جێب" }, "hint": { en: "Car Brand", ku: "جام" } },
+    { word: { en: "Telescope", ku: "تەلەسکۆپ" }, "hint": { en: "Instrument", ku: "ئامێر" } },
+    { word: { en: "Printing Press", ku: "پرینتەر" }, "hint": { en: "Machine", ku: "ئامێر" } },
+    { word: { en: "The Wheel", ku: "تایە" }, "hint": { en: "Invention", ku: "داهێنان" } },
+    { word: { en: "The Compass", ku: "قیبلە نما" }, "hint": { en: "Instrument", ku: "ئامێر" } },
+    { word: { en: "Dynamite", ku: "دینامیت" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "The Mona Lisa", ku: "مۆنالیزا" }, "hint": { en: "Painting", ku: "قژ" } },
+    { word: { en: "iPhone", ku: "ئایفۆن" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "Windows (OS)", ku: "ویندۆز" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "Android (OS)", ku: "ئەندرۆید" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "Laser", ku: "لێزەر" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "The Telephone", ku: "تەلەفۆن" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "The Radio", ku: "ڕادیۆ" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "The Television", ku: "تەلەفزیۆن" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "Pen", ku: "قەڵەم" }, "hint": { en: "Writing", ku: "ڕەش" } },
+    { word: { en: "Paper", ku: "کاغەز" }, "hint": { en: "Writing", ku: "سپی" } },
+    { word: { en: "Money", ku: "پارە" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Watch/Clock", ku: "کاتژمێر" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Mirror", ku: "ئاوێنە" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Spoon", ku: "کەوچک" }, "hint": { en: "Kitchenware", ku: "خواردن" } },
+    { word: { en: "Fork", ku: "چەتاڵ" }, "hint": { en: "Kitchenware", ku: "خواردن" } },
+    { word: { en: "Knife", ku: "چەقۆ" }, "hint": { en: "Kitchenware", ku: "خواردن" } },
+    { word: { en: "Plate", ku: "قاپ" }, "hint": { en: "Kitchenware", ku: "خواردن" } },
+    { word: { en: "Cup", ku: "پەرداخ" }, "hint": { en: "Kitchenware", ku: "خواردن" } },
+    { word: { en: "Towel", ku: "خاولی" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Soap", ku: "سابوون" }, "hint": { en: "Hygiene", ku: "ماڵ" } },
+    { word: { en: "Light/Lamp", ku: "گڵۆپ" }, "hint": { en: "Home", ku: "ماڵ" } },
+    { word: { en: "Camera", ku: "کامێرا" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "Computer", ku: "کۆمپیوتەر" }, "hint": { en: "Technology", ku: "تەکنەلۆجیا" } },
+    { word: { en: "Box", ku: "سندووق" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Bottle", ku: "بتڵ" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Shirt", ku: "کراس" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Pants", ku: "پانتۆڵ" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Socks", ku: "گۆرەوی" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Hat", ku: "کڵاو" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Gloves", ku: "دەسکێش" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Belt", ku: "پشتێن" }, "hint": { en: "Accessory", ku: "کەلوپەل" } },
+    { word: { en: "Ring", ku: "مستیلە" }, "hint": { en: "Accessory", ku: "کەلوپەل" } },
+    { word: { en: "Necklace", ku: "ملوانکە" }, "hint": { en: "Accessory", ku: "کەلوپەل" } },
+    { word: { en: "Bag", ku: "جانتا" }, "hint": { en: "Accessory", ku: "کەلوپەل" } },
+    { word: { en: "Wallet", ku: "جزدان" }, "hint": { en: "Accessory", ku: "کەلوپەل" } },
+    { word: { en: "Shoes", ku: "پێڵاو" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Coat", ku: "چاکەت" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Skirt", ku: "تەنورە" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Scarf", ku: "لەچک" }, "hint": { en: "Clothing", ku: "جل" } },
+    { word: { en: "Umbrella", ku: "چەتر" }, "hint": { en: "Accessory", ku: "کەلوپەل" } },
+    { word: { en: "Thread", ku: "دەزوو" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Needle", ku: "دەرزی" }, "hint": { en: "Tool", ku: "ئامراز" } },
+    { word: { en: "Scissors", ku: "مەقەست" }, "hint": { en: "Tool", ku: "ئامراز" } },
+    { word: { en: "Wire", ku: "وایەر" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Rope", ku: "گوریس" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Chain", ku: "زنجیر" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Mask", ku: "دەمامک" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Passport", ku: "پاسپۆرت" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Visa", ku: "ڤیزا" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Map", ku: "نەخشە" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Globe", ku: "گۆی زەوی" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Hammer", ku: "چەکوش" }, "hint": { en: "Tool", ku: "ئامراز" } },
+    { word: { en: "Nail (Hardware)", ku: "بزمار" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Screw", ku: "پێچ" }, "hint": { en: "Object", ku: "شت" } },
+    { word: { en: "Glue", ku: "چەسپ" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Paint", ku: "بۆیاخ" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Brick", ku: "خشت" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Cement", ku: "چیمەنتۆ" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Glass", ku: "شووشە" }, "hint": { en: "Material", ku: "ماددە" } },
+    { word: { en: "Plastic", ku: "پلاستیک" }, "hint": { en: "Material", ku: "ماددە" } }
+];
+
+        // Theme system
+        let currentTheme = 'modern';
+        
+        // Language system
+        let currentLanguage = 'en';
+        
+        const translations = {
+            en: {
+                // Main Menu
+                startGame: "Start Game",
+                settings: "Settings",
+                gameHistory: "Game History",
+                
+                // Game Setup
+                gameSetup: "Game Setup",
+                numberOfPlayers: "Number of Players:",
+                numberOfImposters: "Number of Imposters:",
+                playerNames: "Player Names:",
+                back: "← Back",
+                
+                // Game Screen
+                tapToReveal: "Tap to reveal",
+                yourRole: "Your role",
+                tapToSeeRole: "Tap to See Your Role",
+                nextPlayer: "Next Player",
+                startDiscussion: "Start Discussion",
+                discussionTime: "Discussion Time!",
+                findImposters: "Find the imposters!",
+                enterScores: "Enter Player Scores",
+                nextRound: "Next Round",
+                endGame: "End Game",
+                youAreImposter: "You are the IMPOSTER!",
+                noHints: "No hints for you!",
+                hint: "Hint:",
+                round: "Round",
+                total: "Total:",
+                points: "points",
+                roundScore: "Round score",
+                
+                // Settings
+                language: "Language:",
+                theme: "Theme:",
+                editWords: "Edit Words",
+                moreGames: "More Games",
+                clearAllData: "Clear All Data",
+                about: "About",
+                
+                // Word Editor
+                wordDatabase: "Word Database",
+                englishWord: "English Word:",
+                kurdishWord: "Kurdish Word:",
+                englishHint: "English Hint:",
+                kurdishHint: "Kurdish Hint:",
+                addWord: "Add Word",
+                delete: "Delete",
+                enterEnglishWord: "Enter English word",
+                enterKurdishWord: "وشەی کوردی بنووسە",
+                enterEnglishHint: "Enter English hint",
+                enterKurdishHint: "ئاماژەی کوردی بنووسە",
+                
+                // History
+                noGamesYet: "No games played yet",
+                gameSession: "Game Session:",
+                rounds: "rounds",
+                round_single: "round",
+                finalScores: "Final Scores:",
+                impostersPerRound: "Imposters per round:",
+                
+                // About
+                version: "Version: 1.0",
+                developer: "Developer: Didar Baxtear",
+                description: "An exciting party word game where players try to identify the imposters among them!",
+                
+                // Confirmation Dialog
+                clearAllDataTitle: "⚠️ Clear All Data",
+                clearAllDataMessage: "Are you sure you want to clear all game history and settings? This cannot be undone!",
+                yesClearAll: "Yes, Clear All",
+                cancel: "Cancel",
+                
+                // Alerts and Messages
+                impostersLessThanPlayers: "Imposters must be less than total players!",
+                revealRoleFirst: "Please reveal your role first!",
+                fillAllFields: "Please fill all fields!",
+                cannotDelete: "Cannot delete! Minimum 5 words required.",
+                deleteWord: "Delete this word?",
+                allDataCleared: "✅ All data cleared successfully!",
+                
+                // Player placeholders
+                player: "Player",
+                
+                // Custom Word Feature
+                useCustomWord: "Use Custom Word for This Round",
+                customWordTitle: "Choose Word",
+                customWordPrompt: "Would you like to use a custom word for the next round?",
+                customWordLabel: "Custom Word:",
+                customHintLabel: "Hint:",
+                useCustomWordBtn: "Use Custom Word",
+                useRandomWordBtn: "Use Random Word",
+                enterCustomWord: "Enter custom word",
+                enterCustomHint: "Enter hint for the word"
+            },
+            ku: {
+                // Main Menu
+                startGame: "یاری دەستپێبکە",
+                settings: "ڕێکخستنەکان",
+                gameHistory: "مێژووی یاری",
+                
+                // Game Setup
+                gameSetup: "ڕێکخستنی یاری",
+                numberOfPlayers: "ژمارەی یاریزانان:",
+                numberOfImposters: "ژمارەی ساختەکاران:",
+                playerNames: "ناوی یاریزانان:",
+                back: "← گەڕانەوە",
+                
+                // Game Screen
+                tapToReveal: "دەست بدە بۆ ئاشکراکردن",
+                yourRole: "ڕۆڵەکەت",
+                tapToSeeRole: "دەست بدە بۆ بینینی ڕۆڵەکەت",
+                nextPlayer: "یاریزانی داهاتوو",
+                startDiscussion: "گفتوگۆ دەستپێبکە",
+                discussionTime: "کاتی گفتوگۆ!",
+                findImposters: "ساختەکاران بدۆزەرەوە!",
+                enterScores: "خاڵەکان بنووسە",
+                nextRound: "گەڕی داهاتوو",
+                endGame: "یاری کۆتایی بێنە",
+                youAreImposter: "تۆ ساختەکاریت!",
+                noHints: "هیچ ئاماژەیەکت نییە!",
+                hint: "ئاماژە:",
+                round: "گەڕ",
+                total: "کۆی گشتی:",
+                points: "خاڵ",
+                roundScore: "خاڵی گەڕ",
+                
+                // Settings
+                language: "زمان:",
+                theme: "ڕووکار:",
+                editWords: "وشەکان دەستکاری بکە",
+                moreGames: "یاریی زیاتر",
+                clearAllData: "هەموو زانیاریەکان بسڕەوە",
+                about: "دەربارە",
+                
+                // Word Editor
+                wordDatabase: "بنکەی زانیاری وشەکان",
+                englishWord: "وشەی ئینگلیزی:",
+                kurdishWord: "وشەی کوردی:",
+                englishHint: "ئاماژەی ئینگلیزی:",
+                kurdishHint: "ئاماژەی کوردی:",
+                addWord: "وشە زیاد بکە",
+                delete: "سڕینەوە",
+                enterEnglishWord: "Enter English word",
+                enterKurdishWord: "وشەی کوردی بنووسە",
+                enterEnglishHint: "Enter English hint",
+                enterKurdishHint: "ئاماژەی کوردی بنووسە",
+                
+                // History
+                noGamesYet: "هێشتا هیچ یارییەک نەکراوە",
+                gameSession: "دانیشتنی یاری:",
+                rounds: "گەڕ",
+                round_single: "گەڕ",
+                finalScores: "خاڵە کۆتاییەکان:",
+                impostersPerRound: "ساختەکار بۆ هەر گەڕێک:",
+                
+                // About
+                version: "وەشان: ١.٠",
+                developer: "گەشەپێدەر: دیدار بەختیار",
+                description: "یارییەکی سەرنجڕاکێشی کۆمەڵایەتی کە یاریزانان هەوڵ دەدەن ساختەکاران لەنێو خۆیاندا بناسنەوە!",
+                
+                // Confirmation Dialog
+                clearAllDataTitle: "⚠️ هەموو زانیاریەکان بسڕەوە",
+                clearAllDataMessage: "دڵنیایت کە دەتەوێت هەموو مێژووی یاری و ڕێکخستنەکان بسڕیتەوە؟ ئەمە ناگەڕێتەوە!",
+                yesClearAll: "بەڵێ، هەمووی بسڕەوە",
+                cancel: "هەڵوەشاندنەوە",
+                
+                // Alerts and Messages
+                impostersLessThanPlayers: "ساختەکاران دەبێت کەمتر بن لە کۆی یاریزانان!",
+                revealRoleFirst: "تکایە سەرەتا ڕۆڵەکەت ئاشکرا بکە!",
+                fillAllFields: "تکایە هەموو خانەکان پڕ بکەرەوە!",
+                cannotDelete: "ناتوانرێت بسڕدرێتەوە! لانیکەم ٥ وشە پێویستە.",
+                deleteWord: "ئەم وشەیە بسڕیتەوە؟",
+                allDataCleared: "✅ هەموو زانیاریەکان بە سەرکەوتوویی سڕانەوە!",
+                
+                // Player placeholders
+                player: "یاریزان",
+                
+                // Custom Word Feature
+                useCustomWord: "وشەی تایبەت بۆ ئەم گەڕە بەکاربهێنە",
+                customWordTitle: "وشە هەڵبژێرە",
+                customWordPrompt: "دەتەوێت وشەی تایبەت بۆ گەڕی داهاتوو بەکاربهێنیت؟",
+                customWordLabel: "وشەی تایبەت:",
+                customHintLabel: "ئاماژە:",
+                useCustomWordBtn: "وشەی تایبەت بەکاربهێنە",
+                useRandomWordBtn: "وشەی هەڕەمەکی بەکاربهێنە",
+                enterCustomWord: "وشەی تایبەت بنووسە",
+                enterCustomHint: "ئاماژە بۆ وشەکە بنووسە"
+            }
+        };
+
+        function changeTheme(theme) {
+            currentTheme = theme;
+            document.body.className = `theme-${theme}`;
+            
+            // Update active theme button
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.theme-${theme}-btn`).classList.add('active');
+            
+            localStorage.setItem('kurdishImposterTheme', theme);
+        }
+
+        function changeLanguage(language) {
+            currentLanguage = language;
+            localStorage.setItem('kurdishImposterLanguage', language);
+            updateLanguageDisplay();
+        }
+
+        function updateLanguageDisplay() {
+            const t = translations[currentLanguage];
+            
+            // Update main menu
+            const mainMenuButtons = document.querySelectorAll('#mainMenu .btn');
+            if (mainMenuButtons[0]) mainMenuButtons[0].textContent = t.startGame;
+            if (mainMenuButtons[1]) mainMenuButtons[1].textContent = t.settings;
+            if (mainMenuButtons[2]) mainMenuButtons[2].textContent = t.gameHistory;
+            
+            // Update game setup
+            const gameSetupTitle = document.querySelector('#gameSetup .title');
+            if (gameSetupTitle) gameSetupTitle.textContent = t.gameSetup;
+            
+            const gameSetupLabels = document.querySelectorAll('#gameSetup label');
+            if (gameSetupLabels[0]) gameSetupLabels[0].textContent = t.numberOfPlayers;
+            if (gameSetupLabels[1]) gameSetupLabels[1].textContent = t.numberOfImposters;
+            if (gameSetupLabels[2]) gameSetupLabels[2].textContent = t.playerNames;
+            
+            const gameSetupBtn = document.querySelector('#gameSetup .btn-primary');
+            if (gameSetupBtn) gameSetupBtn.textContent = t.startGame;
+            
+            const gameSetupBackBtn = document.querySelector('#gameSetup .back-btn');
+            if (gameSetupBackBtn) gameSetupBackBtn.textContent = t.back;
+            
+            // Update game screen elements
+            const revealBtn = document.getElementById('revealBtn');
+            if (revealBtn) revealBtn.textContent = t.tapToSeeRole;
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn && nextBtn.textContent === 'Next Player') nextBtn.textContent = t.nextPlayer;
+            if (nextBtn && nextBtn.textContent === 'Start Discussion') nextBtn.textContent = t.startDiscussion;
+            
+            // Update settings
+            const settingsTitle = document.querySelector('#settingsScreen .title');
+            if (settingsTitle) settingsTitle.textContent = t.settings;
+            
+            const settingsLabels = document.querySelectorAll('#settingsScreen label');
+            if (settingsLabels[0]) settingsLabels[0].textContent = t.language;
+            if (settingsLabels[1]) settingsLabels[1].textContent = t.theme;
+            
+            const settingsButtons = document.querySelectorAll('#settingsScreen .btn');
+            if (settingsButtons[0]) settingsButtons[0].textContent = t.editWords;
+            if (settingsButtons[1]) settingsButtons[1].textContent = t.moreGames;
+            if (settingsButtons[2]) settingsButtons[2].textContent = t.clearAllData;
+            if (settingsButtons[3]) settingsButtons[3].textContent = t.about;
+            
+            const settingsBackBtn = document.querySelector('#settingsScreen .back-btn');
+            if (settingsBackBtn) settingsBackBtn.textContent = t.back;
+            
+            // Update word editor
+            const wordEditorTitle = document.querySelector('#wordEditor h3');
+            if (wordEditorTitle) wordEditorTitle.textContent = t.wordDatabase;
+            
+            const wordEditorLabels = document.querySelectorAll('#wordEditor label');
+            if (wordEditorLabels[0]) wordEditorLabels[0].textContent = t.englishWord;
+            if (wordEditorLabels[1]) wordEditorLabels[1].textContent = t.kurdishWord;
+            if (wordEditorLabels[2]) wordEditorLabels[2].textContent = t.englishHint;
+            if (wordEditorLabels[3]) wordEditorLabels[3].textContent = t.kurdishHint;
+            
+            const addWordBtn = document.querySelector('#wordEditor .btn-primary');
+            if (addWordBtn) addWordBtn.textContent = t.addWord;
+            
+            // Update placeholders
+            const newWordEn = document.getElementById('newWordEn');
+            if (newWordEn) newWordEn.placeholder = t.enterEnglishWord;
+            
+            const newWordKu = document.getElementById('newWordKu');
+            if (newWordKu) newWordKu.placeholder = t.enterKurdishWord;
+            
+            const newHintEn = document.getElementById('newHintEn');
+            if (newHintEn) newHintEn.placeholder = t.enterEnglishHint;
+            
+            const newHintKu = document.getElementById('newHintKu');
+            if (newHintKu) newHintKu.placeholder = t.enterKurdishHint;
+            
+            // Update history title
+            const historyTitle = document.querySelector('#historyScreen .title');
+            if (historyTitle) historyTitle.textContent = t.gameHistory;
+            
+            const historyBackBtn = document.querySelector('#historyScreen .back-btn');
+            if (historyBackBtn) historyBackBtn.textContent = t.back;
+            
+            // Update about screen
+            const aboutTitle = document.querySelector('#aboutScreen .title');
+            if (aboutTitle) aboutTitle.textContent = t.about;
+            
+            const aboutBackBtn = document.querySelector('#aboutScreen .back-btn');
+            if (aboutBackBtn) aboutBackBtn.textContent = t.back;
+            
+            const aboutContent = document.querySelectorAll('#aboutScreen p');
+            if (aboutContent[1]) aboutContent[1].textContent = t.version;
+            if (aboutContent[2]) aboutContent[2].textContent = t.developer;
+            if (aboutContent[3]) aboutContent[3].textContent = t.description;
+            
+            // Update confirmation dialog
+            const confirmTitle = document.querySelector('#confirmDialog h3');
+            if (confirmTitle) confirmTitle.textContent = t.clearAllDataTitle;
+            
+            const confirmMessage = document.querySelector('#confirmDialog p');
+            if (confirmMessage) confirmMessage.textContent = t.clearAllDataMessage;
+            
+            const confirmButtons = document.querySelectorAll('#confirmDialog .btn');
+            if (confirmButtons[0]) confirmButtons[0].textContent = t.yesClearAll;
+            if (confirmButtons[1]) confirmButtons[1].textContent = t.cancel;
+            
+
+            
+            // Update custom word dialog
+            const dialogCustomWordInput = document.getElementById('dialogCustomWord');
+            if (dialogCustomWordInput) dialogCustomWordInput.placeholder = t.enterCustomWord;
+            
+            const dialogCustomHintInput = document.getElementById('dialogCustomHint');
+            if (dialogCustomHintInput) dialogCustomHintInput.placeholder = t.enterCustomHint;
+            
+            const dialogLabels = document.querySelectorAll('#customWordDialog label');
+            if (dialogLabels[0]) dialogLabels[0].textContent = t.customWordLabel;
+            if (dialogLabels[1]) dialogLabels[1].textContent = t.customHintLabel;
+            
+            const dialogButtons = document.querySelectorAll('#customWordDialog .btn');
+            if (dialogButtons[0]) dialogButtons[0].textContent = t.useCustomWordBtn;
+            if (dialogButtons[1]) dialogButtons[1].textContent = t.useRandomWordBtn;
+            
+            const dialogPrompt = document.querySelector('#customWordDialog p');
+            if (dialogPrompt) dialogPrompt.textContent = t.customWordPrompt;
+        }
+
+        // Screen navigation functions
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showMainMenu() {
+            showScreen('mainMenu');
+        }
+
+        function showGameSetup() {
+            showScreen('gameSetup');
+            updatePlayersList();
+        }
+
+        function showSettings() {
+            showScreen('settingsScreen');
+            updateWordList();
+        }
+
+        function showHistory() {
+            showScreen('historyScreen');
+            loadGameHistory();
+        }
+
+        function showAbout() {
+            showScreen('aboutScreen');
+        }
+
+
+
+        // Player management
+        function updatePlayersList() {
+            const t = translations[currentLanguage];
+            const count = parseInt(document.getElementById('playerCount').value);
+            const container = document.getElementById('playersList');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= count; i++) {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                playerItem.innerHTML = `
+                    <div class="player-number">${i}</div>
+                    <input type="text" class="player-name-input" placeholder="${t.player} ${i}" value="${gameState.playerNames[i-1] || ''}" onchange="updatePlayerName(${i-1}, this.value)">
+                `;
+                container.appendChild(playerItem);
+            }
+        }
+
+        function updatePlayerName(index, name) {
+            const t = translations[currentLanguage];
+            if (!gameState.playerNames) gameState.playerNames = [];
+            gameState.playerNames[index] = name || `${t.player} ${index + 1}`;
+        }
+
+        // Game logic
+        function startGame() {
+            const playerCount = parseInt(document.getElementById('playerCount').value);
+            const imposterCount = parseInt(document.getElementById('imposterCount').value);
+            const t = translations[currentLanguage];
+            
+            if (imposterCount >= playerCount) {
+                alert(t.impostersLessThanPlayers);
+                return;
+            }
+            
+            // Update player names
+            for (let i = 0; i < playerCount; i++) {
+                if (!gameState.playerNames[i]) {
+                    gameState.playerNames[i] = `Player ${i + 1}`;
+                }
+            }
+            
+            gameState.players = playerCount;
+            gameState.imposters = imposterCount;
+            
+            // Initialize player scores if starting fresh
+            if (gameState.roundNumber === 1) {
+                gameState.playerScores = [];
+                // Hide score section for new games
+                document.getElementById('scoreSection').style.display = 'none';
+            }
+            
+            // Show custom word dialog before starting the game
+            showCustomWordDialogForStart();
+        }
+
+        function updateGameDisplay() {
+            const t = translations[currentLanguage];
+            
+            document.getElementById('currentPlayerName').textContent = gameState.playerNames[gameState.currentPlayer - 1];
+            document.getElementById('currentPlayerNum').textContent = gameState.currentPlayer;
+            document.getElementById('totalPlayers').textContent = gameState.players;
+            
+            const wordCard = document.getElementById('wordCard');
+            const wordMain = document.getElementById('wordMain');
+            const wordHint = document.getElementById('wordHint');
+            const revealBtn = document.getElementById('revealBtn');
+            const gameNavigation = document.getElementById('gameNavigation');
+            
+            wordCard.className = 'word-card';
+            wordMain.textContent = gameState.playerNames[gameState.currentPlayer - 1];
+            wordHint.textContent = t.yourRole;
+            revealBtn.textContent = t.tapToSeeRole;
+            revealBtn.style.display = 'block';
+            gameNavigation.style.display = 'none';
+            gameState.wordRevealed = false;
+        }
+
+        function revealWord() {
+            if (gameState.wordRevealed) return;
+            
+            const t = translations[currentLanguage];
+            const currentRole = gameState.playerRoles[gameState.currentPlayer - 1];
+            const wordCard = document.getElementById('wordCard');
+            const wordMain = document.getElementById('wordMain');
+            const wordHint = document.getElementById('wordHint');
+            const revealBtn = document.getElementById('revealBtn');
+            const gameNavigation = document.getElementById('gameNavigation');
+            
+            if (currentRole.isImposter) {
+                wordCard.classList.add('imposter-card');
+                wordMain.textContent = t.youAreImposter;
+                // Show the main word's hint to the imposter
+                wordHint.textContent = `${t.hint} ${gameState.mainWordHint}`;
+            } else {
+                wordMain.textContent = currentRole.word.word.en;
+                wordHint.textContent = t.noHints;
+            }
+            
+            revealBtn.style.display = 'none';
+            gameNavigation.style.display = 'block';
+            gameState.wordRevealed = true;
+            
+            // Update next button text for last player
+            const nextBtn = document.getElementById('nextBtn');
+            if (gameState.currentPlayer === gameState.players) {
+                nextBtn.textContent = t.startDiscussion;
+            } else {
+                nextBtn.textContent = t.nextPlayer;
+            }
+        }
+
+        function nextPlayer() {
+            const t = translations[currentLanguage];
+            
+            if (!gameState.wordRevealed) {
+                alert(t.revealRoleFirst);
+                return;
+            }
+            
+            if (gameState.currentPlayer < gameState.players) {
+                gameState.currentPlayer++;
+                updateGameDisplay();
+            } else {
+                // All players have seen their roles
+                startDiscussion();
+            }
+        }
+
+        function startDiscussion() {
+            const t = translations[currentLanguage];
+            const wordCard = document.getElementById('wordCard');
+            const wordMain = document.getElementById('wordMain');
+            const wordHint = document.getElementById('wordHint');
+            const nextBtn = document.getElementById('nextBtn');
+            const gameNavigation = document.getElementById('gameNavigation');
+            
+            wordCard.className = 'word-card';
+            wordMain.textContent = t.discussionTime;
+            wordHint.textContent = t.findImposters;
+            
+            // Hide game navigation and show score section
+            gameNavigation.style.display = 'none';
+            showScoreInput();
+        }
+
+        function showScoreInput() {
+            const t = translations[currentLanguage];
+            document.getElementById('scoreSection').style.display = 'block';
+            
+            // Update score section title
+            const scoreSectionTitle = document.querySelector('#scoreSection h3');
+            if (scoreSectionTitle) scoreSectionTitle.textContent = t.enterScores;
+            
+            // Update score section buttons
+            const scoreButtons = document.querySelectorAll('#scoreSection .btn');
+            if (scoreButtons[0]) scoreButtons[0].textContent = t.nextRound;
+            if (scoreButtons[1]) scoreButtons[1].textContent = t.endGame;
+            
+            const container = document.getElementById('scoreInputs');
+            container.innerHTML = `<h4 style="text-align: center; margin-bottom: 15px;">${t.round} ${gameState.roundNumber}</h4>`;
+            
+            for (let i = 0; i < gameState.players; i++) {
+                const totalScore = gameState.playerScores[i] ? gameState.playerScores[i].reduce((a, b) => a + b, 0) : 0;
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'score-item';
+                scoreItem.innerHTML = `
+                    <div style="flex: 1;">
+                        <strong>${gameState.playerNames[i]}</strong><br>
+                        <small>${t.total} ${totalScore} ${t.points}</small>
+                    </div>
+                    <input type="number" class="score-input" value="0" min="0" max="100" id="score-${i}" placeholder="${t.roundScore}">
+                `;
+                container.appendChild(scoreItem);
+            }
+        }
+
+        function nextRound() {
+            // Save scores for this round
+            const roundScores = [];
+            for (let i = 0; i < gameState.players; i++) {
+                const scoreInput = document.getElementById(`score-${i}`);
+                const score = parseInt(scoreInput.value) || 0;
+                roundScores.push(score);
+                
+                // Initialize player scores array if needed
+                if (!gameState.playerScores[i]) {
+                    gameState.playerScores[i] = [];
+                }
+                gameState.playerScores[i].push(score);
+            }
+            
+            // Don't save to history here, only when ending game
+            
+            // Increment round number
+            gameState.roundNumber++;
+            
+            // Show custom word dialog for next round
+            showCustomWordDialog();
+        }
+
+        function showCustomWordDialog() {
+            const t = translations[currentLanguage];
+            showScreen('customWordDialog');
+            
+            // Update dialog content
+            const dialogTitle = document.querySelector('#customWordDialog h3');
+            if (dialogTitle) dialogTitle.textContent = `${t.round} ${gameState.roundNumber} - ${t.customWordTitle || 'Choose Word'}`;
+        }
+
+        function showCustomWordDialogForStart() {
+            const t = translations[currentLanguage];
+            showScreen('customWordDialog');
+            
+            // Update dialog content for first round
+            const dialogTitle = document.querySelector('#customWordDialog h3');
+            if (dialogTitle) dialogTitle.textContent = `${t.round} ${gameState.roundNumber} - ${t.customWordTitle || 'Choose Word'}`;
+        }
+
+        function useRandomWordNextRound() {
+            // Reset for next round
+            gameState.currentPlayer = 1;
+            gameState.wordRevealed = false;
+            document.getElementById('scoreSection').style.display = 'none';
+            
+            // Clear dialog inputs
+            document.getElementById('dialogCustomWord').value = '';
+            document.getElementById('dialogCustomHint').value = '';
+            
+            // Start new game with random words
+            startGameWithWords(null, null);
+        }
+
+        function useCustomWordNextRound() {
+            const customWord = document.getElementById('dialogCustomWord').value.trim();
+            const customHint = document.getElementById('dialogCustomHint').value.trim();
+            const t = translations[currentLanguage];
+            
+            if (!customWord || !customHint) {
+                alert(t.fillAllFields || 'Please fill all fields!');
+                return;
+            }
+            
+            // Reset for next round
+            gameState.currentPlayer = 1;
+            gameState.wordRevealed = false;
+            document.getElementById('scoreSection').style.display = 'none';
+            
+            // Start new game with custom words
+            startGameWithWords(customWord, customHint);
+        }
+
+        function startGameWithWords(customWord, customHint) {
+            gameState.currentPlayer = 1;
+            gameState.wordRevealed = false;
+            
+            // Select words (custom or random)
+            let mainWord, imposterWord;
+            
+            if (customWord && customHint) {
+                // Use custom word for regular players
+                mainWord = {
+                    word: { en: customWord, ku: customWord },
+                    hint: { en: customHint, ku: customHint }
+                };
+                // Random word for imposters
+                imposterWord = wordDatabase[Math.floor(Math.random() * wordDatabase.length)];
+            } else {
+                // Use random words
+                mainWord = wordDatabase[Math.floor(Math.random() * wordDatabase.length)];
+                do {
+                    imposterWord = wordDatabase[Math.floor(Math.random() * wordDatabase.length)];
+                } while (imposterWord === mainWord);
+            }
+            
+            // Store main word hint for imposters
+            gameState.mainWordHint = mainWord.hint.en;
+            
+            // Assign roles
+            gameState.playerRoles = [];
+            const imposterPositions = [];
+            
+            while (imposterPositions.length < gameState.imposters) {
+                const pos = Math.floor(Math.random() * gameState.players);
+                if (!imposterPositions.includes(pos)) {
+                    imposterPositions.push(pos);
+                }
+            }
+            
+            for (let i = 0; i < gameState.players; i++) {
+                gameState.playerRoles.push({
+                    isImposter: imposterPositions.includes(i),
+                    word: imposterPositions.includes(i) ? imposterWord : mainWord
+                });
+            }
+            
+            updateGameDisplay();
+            showScreen('gameScreen');
+        }
+
+        function endGame() {
+            // Save scores for the current round first
+            const roundScores = [];
+            for (let i = 0; i < gameState.players; i++) {
+                const scoreInput = document.getElementById(`score-${i}`);
+                const score = parseInt(scoreInput.value) || 0;
+                roundScores.push(score);
+                
+                // Initialize player scores array if needed
+                if (!gameState.playerScores[i]) {
+                    gameState.playerScores[i] = [];
+                }
+                gameState.playerScores[i].push(score);
+            }
+            
+            // Save complete game to history
+            saveGameToHistory(roundScores);
+            
+            // Reset game state for next game
+            gameState = {
+                players: 5,
+                imposters: 1,
+                currentPlayer: 1,
+                playerNames: [],
+                playerRoles: [],
+                wordRevealed: false,
+                playerScores: [],
+                roundNumber: 1
+            };
+            
+            showMainMenu();
+        }
+
+        // Game History
+        function saveGameToHistory(scores = []) {
+            // Only save when ending game, not after each round
+            if (scores.length === 0) return;
+            
+            const history = JSON.parse(localStorage.getItem('kurdishImposterHistory') || '[]');
+            
+            // Calculate total scores for each player across all rounds
+            const totalScores = [];
+            for (let i = 0; i < gameState.players; i++) {
+                const playerTotalScore = gameState.playerScores[i] ? gameState.playerScores[i].reduce((a, b) => a + b, 0) : 0;
+                totalScores.push(playerTotalScore);
+            }
+            
+            const gameRecord = {
+                date: new Date().toLocaleDateString(),
+                time: new Date().toLocaleTimeString(),
+                players: [...gameState.playerNames],
+                scores: [...totalScores],
+                rounds: gameState.roundNumber, // Current round number is correct
+                imposters: gameState.imposters
+            };
+            
+            history.unshift(gameRecord);
+            
+            // Keep only last 20 games
+            if (history.length > 20) {
+                history.splice(20);
+            }
+            
+            localStorage.setItem('kurdishImposterHistory', JSON.stringify(history));
+        }
+
+        function loadGameHistory() {
+            const t = translations[currentLanguage];
+            const history = JSON.parse(localStorage.getItem('kurdishImposterHistory') || '[]');
+            const container = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                container.innerHTML = `<p>${t.noGamesYet}</p>`;
+                return;
+            }
+            
+            container.innerHTML = history.map(game => {
+                let playersWithScores = '';
+                if (game.scores && game.scores.length > 0) {
+                    playersWithScores = game.players.map((player, index) => 
+                        `${player}: ${game.scores[index] || 0} ${t.points}`
+                    ).join(', ');
+                } else {
+                    playersWithScores = game.players.join(', ');
+                }
+                
+                const roundsText = game.rounds > 1 ? `${game.rounds} ${t.rounds}` : `1 ${t.round_single}`;
+                
+                return `
+                    <div class="history-item">
+                        <div class="history-date">${game.date} - ${game.time}</div>
+                        <div><strong>${t.gameSession}</strong> ${roundsText}</div>
+                        <div><strong>${t.finalScores}</strong> ${playersWithScores}</div>
+                        <div><strong>${t.impostersPerRound}</strong> ${game.imposters}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Word Editor
+        function toggleWordEditor() {
+            const editor = document.getElementById('wordEditor');
+            const isVisible = editor.style.display !== 'none';
+            
+            if (isVisible) {
+                editor.style.display = 'none';
+            } else {
+                editor.style.display = 'block';
+                updateWordList();
+            }
+        }
+
+        function updateWordList() {
+            const t = translations[currentLanguage];
+            const container = document.getElementById('wordList');
+            container.innerHTML = wordDatabase.map((word, index) => `
+                <div class="word-item">
+                    <div>
+                        <strong>${word.word.en} / ${word.word.ku}</strong><br>
+                        <small>${word.hint.en} / ${word.hint.ku}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteWord(${index})">${t.delete}</button>
+                </div>
+            `).join('');
+        }
+
+        function addNewWord() {
+            const t = translations[currentLanguage];
+            const wordEn = document.getElementById('newWordEn').value.trim();
+            const wordKu = document.getElementById('newWordKu').value.trim();
+            const hintEn = document.getElementById('newHintEn').value.trim();
+            const hintKu = document.getElementById('newHintKu').value.trim();
+            
+            if (!wordEn || !wordKu || !hintEn || !hintKu) {
+                alert(t.fillAllFields);
+                return;
+            }
+            
+            wordDatabase.push({
+                word: { en: wordEn, ku: wordKu },
+                hint: { en: hintEn, ku: hintKu }
+            });
+            
+            // Clear inputs
+            document.getElementById('newWordEn').value = '';
+            document.getElementById('newWordKu').value = '';
+            document.getElementById('newHintEn').value = '';
+            document.getElementById('newHintKu').value = '';
+            
+            updateWordList();
+        }
+
+        function deleteWord(index) {
+            const t = translations[currentLanguage];
+            
+            if (wordDatabase.length <= 5) {
+                alert(t.cannotDelete);
+                return;
+            }
+            
+            if (confirm(t.deleteWord)) {
+                wordDatabase.splice(index, 1);
+                updateWordList();
+            }
+        }
+
+        function openMoreGames() {
+            window.open('https://github.com/Didar122/', '_blank', 'noopener,noreferrer');
+        }
+
+        function clearAllData() {
+            showScreen('confirmDialog');
+        }
+
+        function confirmClearData() {
+            // Clear localStorage
+            localStorage.removeItem('kurdishImposterHistory');
+            localStorage.removeItem('kurdishImposterTheme');
+            
+            // Reset game state
+            gameState = {
+                players: 5,
+                imposters: 1,
+                currentPlayer: 1,
+                playerNames: [],
+                playerRoles: [],
+                wordRevealed: false,
+                playerScores: [],
+                roundNumber: 1
+            };
+            
+            // Reset theme to default
+            changeTheme('modern');
+            
+            showSettings();
+            
+            // Show success message in a custom way
+            setTimeout(() => {
+                const t = translations[currentLanguage];
+                const container = document.querySelector('#settingsScreen .container');
+                const successMsg = document.createElement('div');
+                successMsg.style.cssText = 'background: rgba(67, 233, 123, 0.2); color: white; padding: 15px; border-radius: 10px; margin: 15px 0; text-align: center;';
+                successMsg.textContent = t.allDataCleared;
+                container.insertBefore(successMsg, container.firstChild.nextSibling);
+                
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 3000);
+            }, 100);
+        }
+
+        function cancelClearData() {
+            showSettings();
+        }
+
+        // Check if splash image exists
+        function checkSplashImage() {
+            const splashLogo = document.getElementById('splashLogo');
+            const testImg = new Image();
+            
+            testImg.onload = function() {
+                // Image exists, hide emoji
+                splashLogo.textContent = '';
+            };
+            
+            testImg.onerror = function() {
+                // Image doesn't exist, show emoji and remove background
+                splashLogo.classList.add('no-image');
+                splashLogo.textContent = '🎭';
+            };
+            
+            testImg.src = 'splash.png';
+        }
+
+        // Button sound effects
+        function playButtonSound() {
+            // Create a simple click sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Tap Animation Effects
+        function createRippleEffect(e) {
+            const button = e.currentTarget;
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            const ripple = document.createElement('span');
+            ripple.className = 'tap-ripple';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        function addTapBounce(element) {
+            element.classList.add('tap-bounce');
+            setTimeout(() => {
+                element.classList.remove('tap-bounce');
+            }, 300);
+        }
+
+        // Add click sound and animations to all buttons
+        function addButtonSounds() {
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('btn') || e.target.classList.contains('back-btn') || e.target.classList.contains('theme-btn')) {
+                    try {
+                        playButtonSound();
+                    } catch (error) {
+                        // Silently fail if audio context is not available
+                    }
+                    
+                    // Add tap effects
+                    if (e.target.classList.contains('btn')) {
+                        e.target.classList.add('tap-effect');
+                        createRippleEffect(e);
+                        addTapBounce(e.target);
+                    } else {
+                        addTapBounce(e.target);
+                    }
+                }
+                
+                // Add tap effects to word cards and other interactive elements
+                if (e.target.classList.contains('word-card') || e.target.closest('.word-card')) {
+                    const wordCard = e.target.classList.contains('word-card') ? e.target : e.target.closest('.word-card');
+                    addTapBounce(wordCard);
+                }
+            });
+        }
+
+        // Initialize
+        function initApp() {
+            // Load saved theme
+            const savedTheme = localStorage.getItem('kurdishImposterTheme');
+            if (savedTheme) {
+                changeTheme(savedTheme);
+            }
+            
+            // Load saved language
+            const savedLanguage = localStorage.getItem('kurdishImposterLanguage');
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                document.getElementById('languageSelect').value = savedLanguage;
+                updateLanguageDisplay();
+            }
+            
+            checkSplashImage();
+            updatePlayersList();
+            addButtonSounds();
+            
+            // Show splash screen for 3 seconds
+            setTimeout(() => {
+                showMainMenu();
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9890460797a8f74a',t:'MTc1OTUzNDcxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
