@@ -230,6 +230,69 @@
             box-sizing: border-box;
         }
 
+        .number-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+            gap: 5px;
+        }
+
+        .number-input {
+            width: 60px !important;
+            padding: 12px !important;
+            text-align: center;
+            flex: 1;
+        }
+
+        .number-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .number-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+        }
+
+        .number-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .score-item .number-input-container {
+            max-width: 120px;
+            margin: 0;
+        }
+        
+        .score-item .number-input {
+            width: 50px !important;
+            padding: 10px !important;
+            font-size: 0.95rem;
+            border-radius: 8px;
+        }
+        
+        .score-item .number-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 1.1rem;
+        }
+
         .players-list {
             max-height: 200px;
             overflow-y: auto;
@@ -394,12 +457,11 @@
             gap: 10px;
         }
 
-        .score-input {
-            width: 80px;
-            padding: 8px;
-            border: none;
+        .score-item .number-input {
+            width: 50px !important;
+            padding: 10px !important;
+            font-size: 0.95rem;
             border-radius: 8px;
-            text-align: center;
         }
 
         .back-btn {
@@ -596,12 +658,20 @@
             
             <div class="input-group">
                 <label>Number of Players:</label>
-                <input type="number" id="playerCount" min="3" max="20" value="5" onchange="updatePlayersList()">
+                <div class="number-input-container">
+                    <button class="number-btn decrease" onclick="adjustNumber('playerCount', -1)">-</button>
+                    <input type="number" id="playerCount" class="number-input" min="3" max="20" value="5" onchange="updatePlayersList()">
+                    <button class="number-btn increase" onclick="adjustNumber('playerCount', 1)">+</button>
+                </div>
             </div>
             
             <div class="input-group">
                 <label>Number of Imposters:</label>
-                <input type="number" id="imposterCount" min="1" max="5" value="1">
+                <div class="number-input-container">
+                    <button class="number-btn decrease" onclick="adjustNumber('imposterCount', -1)">-</button>
+                    <input type="number" id="imposterCount" class="number-input" min="1" max="5" value="1">
+                    <button class="number-btn increase" onclick="adjustNumber('imposterCount', 1)">+</button>
+                </div>
             </div>
 
             <div class="input-group">
@@ -1580,6 +1650,35 @@
             gameState.playerNames[index] = name || `${t.player} ${index + 1}`;
         }
 
+        // Number input controls
+        function adjustNumber(inputId, delta) {
+            const input = document.getElementById(inputId);
+            let value = parseInt(input.value) || 0;
+            value += delta;
+
+            // Apply min/max constraints
+            if (input.hasAttribute('min')) {
+                value = Math.max(value, parseInt(input.getAttribute('min')));
+            }
+            if (input.hasAttribute('max')) {
+                value = Math.min(value, parseInt(input.getAttribute('max')));
+            }
+
+            input.value = value;
+
+            // Trigger onchange event if exists
+            if (inputId === 'playerCount') {
+                updatePlayersList();
+            }
+        }
+
+        function adjustScore(playerIndex, delta) {
+            const input = document.getElementById(`score-${playerIndex}`);
+            let value = parseInt(input.value) || 0;
+            value += delta;
+            input.value = value;
+        }
+
         // Game logic
         function startGame() {
             const playerCount = parseInt(document.getElementById('playerCount').value);
@@ -1729,7 +1828,11 @@
                         <strong>${gameState.playerNames[i]}</strong><br>
                         <small>${t.total} ${totalScore} ${t.points}</small>
                     </div>
-                    <input type="number" class="score-input" value="0" min="0" max="100" id="score-${i}" placeholder="${t.roundScore}">
+                    <div class="number-input-container">
+                        <button class="number-btn decrease" onclick="adjustScore(${i}, -1)">-</button>
+                        <input type="number" class="number-input score-input" value="0" id="score-${i}" placeholder="${t.roundScore}">
+                        <button class="number-btn increase" onclick="adjustScore(${i}, 1)">+</button>
+                    </div>
                 `;
                 container.appendChild(scoreItem);
             }
