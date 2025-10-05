@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Kurdish Imposter - Party Word Game</title>
     
     <!-- PWA Support -->
@@ -18,16 +19,29 @@
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="manifest" href="manifest.json">
     <style>
+        html {
+            background: #667eea;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
         body {
             box-sizing: border-box;
             margin: 0;
-            padding: 0;
+            padding: env(safe-area-inset-top) 0 0 0;
             font-family: 'Arial', sans-serif;
             min-height: 100vh;
             color: white;
             overflow-x: hidden;
             user-select: none;
             transition: all 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Theme Backgrounds */
