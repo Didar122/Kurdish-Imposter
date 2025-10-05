@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Kurdish Imposter - Party Word Game</title>
     
     <!-- PWA Support -->
@@ -515,8 +516,10 @@
 
         @media (max-width: 480px) {
             .container {
-                padding: 20px;
+                padding: 15px;
                 margin: 10px;
+                width: calc(100% - 20px);
+                max-width: none;
             }
             
             .title {
@@ -526,6 +529,21 @@
             .word-main {
                 font-size: 1.5rem;
             }
+
+            .screen {
+                padding: 10px;
+            }
+
+            .back-btn {
+                top: 10px;
+                left: 10px;
+            }
+        }
+
+        /* Disable tap highlight and selection */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
         }
     </style>
 </head>
@@ -1615,10 +1633,12 @@
             if (currentRole.isImposter) {
                 wordCard.classList.add('imposter-card');
                 wordMain.textContent = t.youAreImposter;
-                // Show the main word's hint to the imposter
-                wordHint.textContent = `${t.hint} ${gameState.mainWordHint}`;
+                // Show the main word's hint to the imposter in current language
+                const hintText = currentLanguage === 'ku' ? gameState.mainWordHint.ku : gameState.mainWordHint.en;
+                wordHint.textContent = `${t.hint} ${hintText}`;
             } else {
-                wordMain.textContent = currentRole.word.word.en;
+                // Show word in current language
+                wordMain.textContent = currentLanguage === 'ku' ? currentRole.word.word.ku : currentRole.word.word.en;
                 wordHint.textContent = t.noHints;
             }
             
@@ -1799,8 +1819,8 @@
             }
             
             // Store main word hint for imposters
-            gameState.mainWordHint = mainWord.hint.en;
-            
+            gameState.mainWordHint = mainWord.hint;
+
             // Assign roles
             gameState.playerRoles = [];
             const imposterPositions = [];
