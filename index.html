@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#667eea">
     <title>Kurdish Imposter - Party Word Game</title>
     
     <!-- PWA Support -->
@@ -1895,7 +1896,7 @@
             // Only save when ending game, not after each round
             if (scores.length === 0) return;
             
-            const history = JSON.parse(localStorage.getItem('kurdishImposterHistory') || '[]');
+            const history = JSON.parse(localStorage.getItem('kurdishImposterHistory' ) || '[]');
             
             // Calculate total scores for each player across all rounds
             const totalScores = [];
