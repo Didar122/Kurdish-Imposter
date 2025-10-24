@@ -622,6 +622,16 @@
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
         }
+
+        /* Winner highlight for results */
+        .winner {
+            color: #43e97b;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .imposter-red {
+            color: #ff3838 !important;
+        }
     </style>
 </head>
 <body class="theme-modern">
@@ -647,6 +657,8 @@
             <button class="btn btn-primary" onclick="showGameSetup()">Start Game</button>
             <button class="btn btn-secondary" onclick="showSettings()">Settings</button>
             <button class="btn" onclick="showHistory()">Game History</button>
+            <!-- Updates Button -->
+            <button class="btn" onclick="showUpdates()" id="updatesBtn">Updates</button>
         </div>
     </div>
 
@@ -782,13 +794,52 @@
         </div>
     </div>
 
+    <!-- Updates Page -->
+    <div class="screen scrollable" id="updatesScreen">
+        <button class="back-btn" onclick="showMainMenu()">← گەڕانەوە</button>
+        <div class="container">
+            <h2 class="title" id="updatesTitle">نوێکاریەکان</h2>
+            <!--
+                Edit the content below to update the "What's New" section.
+                You can add HTML, lists, etc.
+            -->
+            <div id="updatesContent">
+                <h2>_____________________</h2>
+                <h2>وەشانی 1,0,7</h2>
+                <h3>زیادکراوەکان</h3>
+                <ul>
+                    <li>زیادکردنی پەڕەیەکی نوێ بۆ کاتی کۆتایی هێنان بە یاریەکە کە تێیدا خاڵەکان نیشان دەدرێت و براوە دەستنیشان دەکرێت</li>
+                    <li>پەڕەیەکی نوێ "نوێکارییەکان" زیادکرا بۆ زانیاری دەربارەی گۆڕانکارییە نوێکان</li>
+                </ul>
+                <h3>گۆڕانکاریەکان</h3>
+                <ul>
+                    <li>ئێستا لەجیاتی بۆکسی پڕتەقاڵی بۆ ساختەکار تەنها ناونیشانی ساختەکارەکە سور دەبێت بەمەبەستی نەهێشتنی تیشکدانەوە لەسەر دەموچاو لە کاتی یاریکردندا</li>
+                    <li>وەشانی یاری لە پەڕەی دەربارە سڕایەوە بەهۆی ئەوەی لە پەڕەی "نوێکاریەکان"دا بەردەستە</li>
+                    <li>چاککردنی هەندێک لە ووشە کوردییەکان</li>
+                </ul>
+                <h2>وەشانە کۆنەکان</h2>
+                <ul>
+                    <li>گۆڕانکاریە کۆنەکان بەردەست نین.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Results Modal/Screen -->
+    <div class="screen" id="resultsScreen" style="background: rgba(0,0,0,0.8);">
+        <div class="container" style="max-width: 400px;">
+            <h3 style="margin-bottom: 20px;">ئەنجامی یاریەکە</h3>
+            <div id="resultsList"></div>
+            <button class="btn btn-primary" onclick="returnToHome()">گەڕانەوە بۆ پەڕەی سەرەکی</button>
+        </div>
+    </div>
+
     <!-- About -->
     <div class="screen" id="aboutScreen">
         <button class="back-btn" onclick="showSettings()">← Back</button>
         <div class="container">
             <h2 class="title">About</h2>
             <p><strong>Kurdish Imposter</strong></p>
-            <p>Version: 1.0.17</p>
             <p>Developer: Didar Baxtear</p>
             <p>An exciting party word game where players try to identify the imposters among them!</p>
         </div>
@@ -1335,6 +1386,7 @@
                 startGame: "Start Game",
                 settings: "Settings",
                 gameHistory: "Game History",
+                updates: "Updates",
                 
                 // Game Setup
                 gameSetup: "Game Setup",
@@ -1426,9 +1478,10 @@
             },
             ku: {
                 // Main Menu
-                startGame: "یاری دەستپێبکە",
+                startGame: "یاری نوێ",
                 settings: "ڕێکخستنەکان",
-                gameHistory: "مێژووی یاری",
+                gameHistory: "مێژووی یاریە کۆنەکان",
+                updates: "نوێکارییەکان",
                 
                 // Game Setup
                 gameSetup: "ڕێکخستنی یاری",
@@ -1438,17 +1491,17 @@
                 back: "← گەڕانەوە",
                 
                 // Game Screen
-                tapToReveal: "دەست بدە بۆ ئاشکراکردن",
+                tapToReveal: "ئاشکراکردن",
                 yourRole: "ڕۆڵەکەت",
-                tapToSeeRole: "دەست بدە بۆ بینینی ڕۆڵەکەت",
+                tapToSeeRole: "دەستی پێدانێ بۆ بینینی ڕۆڵەکەت",
                 nextPlayer: "یاریزانی داهاتوو",
                 startDiscussion: "گفتوگۆ دەستپێبکە",
-                discussionTime: "کاتی گفتوگۆ!",
-                findImposters: "ساختەکاران بدۆزەرەوە!",
+                discussionTime: "کاتی دۆزینەوەی ساختەکار",
+                findImposters: "ساختەکار بدۆزنەوە",
                 enterScores: "خاڵەکان بنووسە",
                 nextRound: "گەڕی داهاتوو",
-                endGame: "یاری کۆتایی بێنە",
-                youAreImposter: "تۆ ساختەکاریت!",
+                endGame: "کۆتایی هێنان بە یاری",
+                youAreImposter: "تۆ ساختەکاریت",
                 noHints: "هیچ ئاماژەیەکت نییە!",
                 hint: "ئاماژە:",
                 round: "گەڕ",
@@ -1460,7 +1513,7 @@
                 language: "زمان:",
                 theme: "ڕووکار:",
                 editWords: "وشەکان دەستکاری بکە",
-                moreGames: "یاریی زیاتر",
+                moreGames: "یارییەکانی ترم",
                 clearAllData: "هەموو زانیاریەکان بسڕەوە",
                 about: "دەربارە",
                 
@@ -1494,7 +1547,7 @@
                 clearAllDataTitle: "⚠️ هەموو زانیاریەکان بسڕەوە",
                 clearAllDataMessage: "دڵنیایت کە دەتەوێت هەموو مێژووی یاری و ڕێکخستنەکان بسڕیتەوە؟ ئەمە ناگەڕێتەوە!",
                 yesClearAll: "بەڵێ، هەمووی بسڕەوە",
-                cancel: "هەڵوەشاندنەوە",
+                cancel: "پەشیمانبوونەوە",
                 
                 // Alerts and Messages
                 impostersLessThanPlayers: "ساختەکاران دەبێت کەمتر بن لە کۆی یاریزانان!",
@@ -1545,7 +1598,8 @@
             if (mainMenuButtons[0]) mainMenuButtons[0].textContent = t.startGame;
             if (mainMenuButtons[1]) mainMenuButtons[1].textContent = t.settings;
             if (mainMenuButtons[2]) mainMenuButtons[2].textContent = t.gameHistory;
-            
+            if (mainMenuButtons[3]) mainMenuButtons[3].textContent = t.updates; // <-- Add this line
+
             // Update game setup
             const gameSetupTitle = document.querySelector('#gameSetup .title');
             if (gameSetupTitle) gameSetupTitle.textContent = t.gameSetup;
@@ -1627,9 +1681,8 @@
             if (aboutBackBtn) aboutBackBtn.textContent = t.back;
             
             const aboutContent = document.querySelectorAll('#aboutScreen p');
-            if (aboutContent[1]) aboutContent[1].textContent = t.version;
-            if (aboutContent[2]) aboutContent[2].textContent = t.developer;
-            if (aboutContent[3]) aboutContent[3].textContent = t.description;
+            if (aboutContent[1]) aboutContent[1].textContent = t.developer;
+            if (aboutContent[2]) aboutContent[2].textContent = t.description;
             
             // Update confirmation dialog
             const confirmTitle = document.querySelector('#confirmDialog h3');
@@ -1694,7 +1747,35 @@
             showScreen('aboutScreen');
         }
 
+        // Show Updates screen
+        function showUpdates() {
+            showScreen('updatesScreen');
+        }
 
+        // Show Results screen
+        function showResultsScreen() {
+            // Calculate total scores and winner(s)
+            const t = translations[currentLanguage];
+            const scores = gameState.playerScores.map(arr => arr.reduce((a, b) => a + b, 0));
+            const maxScore = Math.max(...scores);
+            const winners = [];
+            for (let i = 0; i < scores.length; i++) {
+                if (scores[i] === maxScore) winners.push(gameState.playerNames[i]);
+            }
+            let html = '<ul style="list-style:none;padding:0;">';
+            for (let i = 0; i < gameState.players; i++) {
+                const isWinner = scores[i] === maxScore;
+                html += `<li${isWinner ? ' class="winner"' : ''}>${gameState.playerNames[i]}: ${scores[i]} ${t.points}${isWinner ? ' 🏆' : ''}</li>`;
+            }
+            html += '</ul>';
+            html += `<div style="margin-top:25px;"><strong>براوە${winners.length > 1 ? 'کان' : ''}:</strong> ${winners.join(', ')}</div>`;
+            document.getElementById('resultsList').innerHTML = html;
+            showScreen('resultsScreen');
+        }
+
+        function returnToHome() {
+            showMainMenu();
+        }
 
         // Player management
         function updatePlayersList() {
@@ -1796,6 +1877,7 @@
             
             wordCard.className = 'word-card';
             wordMain.textContent = gameState.playerNames[gameState.currentPlayer - 1];
+            wordMain.classList.remove('imposter-red');
             wordHint.textContent = t.yourRole;
             revealBtn.textContent = t.tapToSeeRole;
             revealBtn.style.display = 'block';
@@ -1803,6 +1885,7 @@
             gameState.wordRevealed = false;
         }
 
+        // Reveal word logic (imposter text red, no box color change)
         function revealWord() {
             if (gameState.wordRevealed) return;
             
@@ -1814,15 +1897,19 @@
             const revealBtn = document.getElementById('revealBtn');
             const gameNavigation = document.getElementById('gameNavigation');
             
+            // Remove imposter-card class if present
+            wordCard.className = 'word-card';
+
             if (currentRole.isImposter) {
-                wordCard.classList.add('imposter-card');
+                // Only text turns red, not the box
                 wordMain.textContent = t.youAreImposter;
+                wordMain.classList.add('imposter-red');
                 // Show the main word's hint to the imposter in current language
                 const hintText = currentLanguage === 'ku' ? gameState.mainWordHint.ku : gameState.mainWordHint.en;
                 wordHint.textContent = `${t.hint} ${hintText}`;
             } else {
-                // Show word in current language
                 wordMain.textContent = currentLanguage === 'ku' ? currentRole.word.word.ku : currentRole.word.word.en;
+                wordMain.classList.remove('imposter-red');
                 wordHint.textContent = t.noHints;
             }
             
@@ -1902,7 +1989,7 @@
                         <button class="number-btn decrease" onclick="adjustScore(${i}, -1)">-</button>
                         <input type="number" class="number-input score-input" value="0" id="score-${i}" placeholder="${t.roundScore}">
                         <button class="number-btn increase" onclick="adjustScore(${i}, 1)">+</button>
-                    </div>
+                                       </div>
                 `;
                 container.appendChild(scoreItem);
             }
@@ -2038,18 +2125,21 @@
                 const scoreInput = document.getElementById(`score-${i}`);
                 const score = parseInt(scoreInput.value) || 0;
                 roundScores.push(score);
-                
+
                 // Initialize player scores array if needed
                 if (!gameState.playerScores[i]) {
                     gameState.playerScores[i] = [];
                 }
                 gameState.playerScores[i].push(score);
             }
-            
+
             // Save complete game to history
             saveGameToHistory(roundScores);
-            
-            // Reset game state for next game
+
+            // Show results screen before resetting
+            showResultsScreen();
+
+            // Reset game state for next game after returning home
             gameState = {
                 players: 5,
                 imposters: 1,
@@ -2060,8 +2150,6 @@
                 playerScores: [],
                 roundNumber: 1
             };
-            
-            showMainMenu();
         }
 
         // Game History
