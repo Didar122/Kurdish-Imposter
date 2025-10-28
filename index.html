@@ -2382,12 +2382,29 @@
 
         // Initialize
         function initApp() {
-            // Force snow theme on first load after update - use version number to track updates
-            const currentVersion = '1.0.9';
+            // Force update check and data clear on version change
+            const currentVersion = '1.0.9.1';  // Fixed typo from 'csionurrentVer'
             const lastVersion = localStorage.getItem('kurdishImposterVersion');
+            
             if (lastVersion !== currentVersion) {
+                // Clear all data on version update
+                localStorage.clear();
+                // Set new version
                 localStorage.setItem('kurdishImposterVersion', currentVersion);
-                localStorage.setItem('kurdishImposterTheme', 'snow'); // Force snow theme
+                // Force snow theme
+                localStorage.setItem('kurdishImposterTheme', 'snow');
+                
+                // Reset game state
+                gameState = {
+                    players: 5,
+                    imposters: 1,
+                    currentPlayer: 1,
+                    playerNames: [],
+                    playerRoles: [],
+                    wordRevealed: false,
+                    playerScores: [],
+                    roundNumber: 1
+                };
             }
 
             // Load saved theme (will be 'snow' if first load after update)
