@@ -1153,6 +1153,27 @@
             }
             // Persist
             localStorage.setItem('kurdishImposterMuted', mute ? '1' : '0');
+
+            // --- FIX: Try to play music immediately when unmuting ---
+            if (!mute) {
+                ensureMusicPlaying();
+                // If still paused (mobile), wait for next user gesture to play
+                var bgMusic = document.getElementById('bgMusic');
+                if (bgMusic && bgMusic.paused) {
+                    function tryPlayMusicOnce() {
+                        ensureMusicPlaying();
+                        if (!bgMusic.paused) {
+                            document.removeEventListener('touchstart', tryPlayMusicOnce, true);
+                            document.removeEventListener('click', tryPlayMusicOnce, true);
+                        }
+                    }
+                    document.addEventListener('touchstart', tryPlayMusicOnce, { once: true, capture: true });
+                    document.addEventListener('click', tryPlayMusicOnce, { once: true, capture: true });
+                }
+            } else {
+                // If muting, pause music
+                if (bgMusic) bgMusic.pause();
+            }
         }
         function toggleMute() {
             setMuteState(!isMuted);
