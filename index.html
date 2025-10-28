@@ -1136,44 +1136,43 @@
         // --- Mute logic ---
         let isMuted = false;
         function setMuteState(mute) {
-            isMuted = mute;
-            var bgMusic = document.getElementById('bgMusic');
-            if (bgMusic) bgMusic.muted = mute;
-            // Update toggle button UI
-            var btn = document.getElementById('muteToggleBtn');
-            var icon = document.getElementById('muteIcon');
-            if (btn) {
-                if (mute) {
-                    btn.classList.add('muted');
-                    if (icon) icon.textContent = '🔇';
-                } else {
-                    btn.classList.remove('muted');
-                    if (icon) icon.textContent = '🔊';
-                }
-            }
-            // Persist
-            localStorage.setItem('kurdishImposterMuted', mute ? '1' : '0');
+    isMuted = mute;
+    var bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) bgMusic.muted = mute;
+    // Update toggle button UI
+    var btn = document.getElementById('muteToggleBtn');
+    var icon = document.getElementById('muteIcon');
+    if (btn) {
+        if (mute) {
+            btn.classList.add('muted');
+            if (icon) icon.textContent = '🔇';
+        } else {
+            btn.classList.remove('muted');
+            if (icon) icon.textContent = '🔊';
+        }
+    }
+    // Persist
+    localStorage.setItem('kurdishImposterMuted', mute ? '1' : '0');
 
-            // --- FIX: Try to play music immediately when unmuting ---
-            if (!mute) {
-                ensureMusicPlaying();
-                // If still paused (mobile), wait for next user gesture to play
-                var bgMusic = document.getElementById('bgMusic');
-                if (bgMusic && bgMusic.paused) {
-                    function tryPlayMusicOnce() {
-                        ensureMusicPlaying();
-                        if (!bgMusic.paused) {
-                            document.removeEventListener('touchstart', tryPlayMusicOnce, true);
-                            document.removeEventListener('click', tryPlayMusicOnce, true);
-                        }
-                    }
-                    document.addEventListener('touchstart', tryPlayMusicOnce, { once: true, capture: true });
-                    document.addEventListener('click', tryPlayMusicOnce, { once: true, capture: true });
-                }
-            } else {
-                // If muting, pause music
-                if (bgMusic) bgMusic.pause();
+    // --- FIX: Always try to play music after unmuting, and always re-arm gesture if needed ---
+    if (!mute) {
+        ensureMusicPlaying();
+        var bgMusic = document.getElementById('bgMusic');
+        // Always re-arm gesture listeners if music is paused (mobile/PWA)
+        function tryPlayMusicOnce() {
+            ensureMusicPlaying();
+            if (bgMusic && !bgMusic.paused) {
+                document.removeEventListener('touchstart', tryPlayMusicOnce, true);
+                document.removeEventListener('click', tryPlayMusicOnce, true);
             }
+        }
+        if (bgMusic && bgMusic.paused) {
+            document.addEventListener('touchstart', tryPlayMusicOnce, { once: true, capture: true });
+            document.addEventListener('click', tryPlayMusicOnce, { once: true, capture: true });
+        }
+    } else {
+        if (bgMusic) bgMusic.pause();
+    }
         }
         function toggleMute() {
             setMuteState(!isMuted);
@@ -2436,7 +2435,7 @@
         // Initialize
         function initApp() {
             // Force update check and data clear on version change
-            const currentVersion = '1.0.9.2';  // Fixed typo from 'csionurrentVer'
+            const currentVersion = '1.0.9.3';  // Fixed typo from 'csionurrentVer'
             const lastVersion = localStorage.getItem('kurdishImposterVersion');
             
             if (lastVersion !== currentVersion) {
