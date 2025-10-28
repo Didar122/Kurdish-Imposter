@@ -1067,22 +1067,6 @@
                 <ul>
                     <li>کەمتر دووبارە بوونەوەی وشەکان</li>
                 </ul>
-                <h2>وەشانی 1,0,7</h2>
-                <h3>زیادکراوەکان</h3>
-                <ul>
-                    <li>زیادکردنی پەڕەیەکی نوێ بۆ کاتی کۆتایی هێنان بە یاریەکە کە تێیدا خاڵەکان نیشان دەدرێت و براوە دەستنیشان دەکرێت</li>
-                    <li>پەڕەیەکی نوێ "نوێکارییەکان" زیادکرا بۆ زانیاری دەربارەی گۆڕانکارییە نوێکان</li>
-                </ul>
-                <h3>گۆڕانکاریەکان</h3>
-                <ul>
-                    <li>ئێستا لەجیاتی بۆکسی پڕتەقاڵی بۆ ساختەکار تەنها ناونیشانی ساختەکارەکە سور دەبێت بەمەبەستی نەهێشتنی تیشکدانەوە لەسەر دەموچاو لە کاتی یاریکردندا</li>
-                    <li>وەشانی یاری لە پەڕەی دەربارە سڕایەوە بەهۆی ئەوەی لە پەڕەی "نوێکاریەکان"دا بەردەستە</li>
-                    <li>چاککردنی هەندێک لە ووشە کوردییەکان</li>
-                </ul>
-                <h2>وەشانە کۆنەکان</h2>
-                <ul>
-                    <li>گۆڕانکاریە کۆنەکان بەردەست نین.</li>
-                </ul>
             </div>
         </div>
     </div>
@@ -1180,82 +1164,47 @@
             // Restore mute state
             var savedMute = localStorage.getItem('kurdishImposterMuted');
             setMuteState(savedMute === '1');
-            if (bgMusic) {
-                bgMusic.muted = isMuted;
-                var playPromise = bgMusic.play();
-                if (playPromise && playPromise.catch) {
-                    playPromise.catch(function(){ /* ignore errors (e.g. user gesture required) */ });
+            
+            // Enable audio on first interaction
+            function enableAudio() {
+                if (bgMusic.paused) {
+                    bgMusic.play().catch(function(error) {
+                        console.log("Audio play failed:", error);
+                    });
                 }
             }
+            
+            // Listen for both touch and click events
+            document.addEventListener('touchstart', enableAudio, { once: true });
+            document.addEventListener('click', enableAudio, { once: true });
+            
+            // Handle audio context resume on visibility change
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && !bgMusic.paused) {
+                    bgMusic.play().catch(function(){});
+                }
+            });
+            
+            // Handle audio interruptions
+            bgMusic.addEventListener('pause', function() {
+                if (!isMuted) {
+                    bgMusic.play().catch(function(){});
+                }
+            });
         });
-        (function() {
-            var played = false;
-            function tryPlayMusic() {
-                if (played) return;
-                played = true;
-                var bgMusic = document.getElementById('bgMusic');
-                if (bgMusic) {
-                    bgMusic.muted = isMuted;
-                    var playPromise = bgMusic.play();
-                    if (playPromise && playPromise.catch) {
-                        playPromise.catch(function(){ /* ignore errors */ });
-                    }
-                }
-            }
-            window.addEventListener('click', tryPlayMusic, { once: true, capture: true });
-            window.addEventListener('touchstart', tryPlayMusic, { once: true, capture: true });
-        })();
-        // --- Button sound effects (respect mute) ---
-        function playButtonSound() {
-            if (isMuted) return;
-            // Create a simple click sound using Web Audio API
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
-            
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
-        }
-
-        // Unmute and play background music as soon as possible
-        document.addEventListener('DOMContentLoaded', function() {
+        
+        // Add this function to handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
             var bgMusic = document.getElementById('bgMusic');
-            if (bgMusic) {
-                bgMusic.muted = false;
-                var playPromise = bgMusic.play();
-                if (playPromise && playPromise.catch) {
-                    playPromise.catch(function(){ /* ignore errors (e.g. user gesture required) */ });
+            if (bgMusic && !isMuted) {
+                if (document.hidden) {
+                    bgMusic.pause();
+                } else {
+                    bgMusic.play().catch(function(){});
                 }
             }
         });
 
-        // Try to play music on first user interaction if not already playing
-        (function() {
-            var played = false;
-            function tryPlayMusic() {
-                if (played) return;
-                played = true;
-                var bgMusic = document.getElementById('bgMusic');
-                if (bgMusic) {
-                    bgMusic.muted = false;
-                    var playPromise = bgMusic.play();
-                    if (playPromise && playPromise.catch) {
-                        playPromise.catch(function(){ /* ignore errors */ });
-                    }
-                }
-            }
-            window.addEventListener('click', tryPlayMusic, { once: true, capture: true });
-            window.addEventListener('touchstart', tryPlayMusic, { once: true, capture: true });
-        })();
         // Game state
         let gameState = {
             players: 5,
@@ -1598,6 +1547,7 @@
             if (confirmButtons[0]) confirmButtons[0].textContent = t.yesClearAll;
             if (confirmButtons[1]) confirmButtons[1].textContent = t.cancel;
             
+
 
             
             // Update custom word dialog
@@ -2432,7 +2382,15 @@
 
         // Initialize
         function initApp() {
-            // Load saved theme
+            // Force snow theme on first load after update - use version number to track updates
+            const currentVersion = '1.0.9';
+            const lastVersion = localStorage.getItem('kurdishImposterVersion');
+            if (lastVersion !== currentVersion) {
+                localStorage.setItem('kurdishImposterVersion', currentVersion);
+                localStorage.setItem('kurdishImposterTheme', 'snow'); // Force snow theme
+            }
+
+            // Load saved theme (will be 'snow' if first load after update)
             const savedTheme = localStorage.getItem('kurdishImposterTheme');
             if (savedTheme) {
                 changeTheme(savedTheme);
