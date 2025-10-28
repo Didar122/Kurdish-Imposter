@@ -865,7 +865,7 @@
 </head>
 <body class="theme-snow">
     <!-- Background music audio tag (muted autoplay hack) -->
-    <audio id="bgMusic" src="game_music.mp3" muted autoplay loop></audio>
+    <audio id="bgMusic" src="game_music.mp3" autoplay loop></audio>
     <!-- News Ticker (editable) -->
     <div class="news-ticker" role="region" aria-label="News ticker" aria-live="polite">
         <div class="label">زانیاری</div>
@@ -1137,7 +1137,6 @@
         let isMuted = false;
         function setMuteState(mute) {
             isMuted = mute;
-            // Set audio element mute
             var bgMusic = document.getElementById('bgMusic');
             if (bgMusic) bgMusic.muted = mute;
             // Update toggle button UI
@@ -1158,38 +1157,71 @@
         function toggleMute() {
             setMuteState(!isMuted);
         }
+
         // --- Background music logic (respects mute) ---
+        // Helper: resume audio context and play music if needed
+        function ensureMusicPlaying() {
+            var bgMusic = document.getElementById('bgMusic');
+            if (!bgMusic) return;
+            // Resume audio context if suspended (for iOS/Android/PWA)
+            if (window.AudioContext || window.webkitAudioContext) {
+                try {
+                    var ctx = window._mainAudioCtx;
+                    if (!ctx) {
+                        ctx = window._mainAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (ctx.state === 'suspended') {
+                        ctx.resume();
+                    }
+                } catch (e) {}
+            }
+            // Play music if not muted
+            if (!isMuted) {
+                bgMusic.muted = false;
+                bgMusic.play().catch(function(){});
+            } else {
+                bgMusic.pause();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             var bgMusic = document.getElementById('bgMusic');
             // Restore mute state
             var savedMute = localStorage.getItem('kurdishImposterMuted');
             setMuteState(savedMute === '1');
-            
+
             // Enable audio on first interaction
             function enableAudio() {
-                if (bgMusic.paused) {
-                    bgMusic.play().catch(function(error) {
-                        console.log("Audio play failed:", error);
-                    });
-                }
+                ensureMusicPlaying();
             }
-            
-            // Listen for both touch and click events
             document.addEventListener('touchstart', enableAudio, { once: true });
             document.addEventListener('click', enableAudio, { once: true });
-            
+
+            // Try to play on load (for desktop)
+            setTimeout(ensureMusicPlaying, 200);
+
             // Handle audio context resume on visibility change
             document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && !bgMusic.paused) {
-                    bgMusic.play().catch(function(){});
+                if (!document.hidden) {
+                    setTimeout(ensureMusicPlaying, 100);
                 }
             });
-            
+
             // Handle audio interruptions
-            bgMusic.addEventListener('pause', function() {
-                if (!isMuted) {
-                    bgMusic.play().catch(function(){});
-                }
+            if (bgMusic) {
+                bgMusic.addEventListener('pause', function() {
+                    if (!isMuted) {
+                        ensureMusicPlaying();
+                    }
+                });
+            }
+
+            // Extra: On mobile/PWA, also try on pageshow/focus
+            window.addEventListener('pageshow', function() {
+                setTimeout(ensureMusicPlaying, 100);
+            });
+            window.addEventListener('focus', function() {
+                setTimeout(ensureMusicPlaying, 100);
             });
         });
         
@@ -1200,7 +1232,7 @@
                 if (document.hidden) {
                     bgMusic.pause();
                 } else {
-                    bgMusic.play().catch(function(){});
+                    ensureMusicPlaying();
                 }
             }
         });
