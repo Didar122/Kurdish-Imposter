@@ -425,6 +425,10 @@
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
         }
 
         .theme-btn.active {
@@ -435,6 +439,19 @@
         .theme-dark-btn { background: linear-gradient(135deg, #1a1a2e, #16213e); }
         .theme-light-btn { background: linear-gradient(135deg, #f5f7fa, #c3cfe2); }
         .theme-modern-btn { background: linear-gradient(135deg, #667eea, #764ba2); }
+        /* Updated snow theme button: brighter, emoji, matches others */
+        .theme-snow-btn {
+            background: linear-gradient(135deg, #3a5fa8 0%, #b3e0ff 100%);
+            position: relative;
+        }
+        .theme-snow-btn::after {
+            content: "❄️";
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.3rem;
+            pointer-events: none;
+        }
 
         /* Score Section */
         .score-section {
@@ -716,9 +733,139 @@
             .ticker-item { font-size: 0.95rem; }
             .news-ticker .label { display: none; }
         }
+
+        /* Snow Theme */
+        .theme-snow {
+            /* Brighter blue gradient background */
+            background: linear-gradient(135deg, #3a5fa8 0%, #b3e0ff 100%);
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .snow-container {
+            pointer-events: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 100;
+            overflow: hidden;
+            display: none;
+        }
+        .theme-snow .snow-container {
+            display: block;
+        }
+        .snowflake {
+            position: absolute;
+            top: -40px;
+            color: #fff;
+            opacity: 0.85;
+            font-size: 18px;
+            pointer-events: none;
+            user-select: none;
+            will-change: transform;
+            text-shadow: 0 0 8px #fff, 0 0 2px #b3e0ff;
+            /* Slower snow-fall animation */
+            animation: snow-fall linear forwards;
+        }
+        @keyframes snow-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0.7;
+            }
+        }
+
+        /* Snow overlay for containers and buttons */
+        .snow-overlay {
+            pointer-events: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+            overflow: hidden;
+        }
+        .snow-overlay .snowflake {
+            position: absolute;
+            color: #fff;
+            opacity: 0.7;
+            font-size: 14px;
+            user-select: none;
+            pointer-events: none;
+            will-change: transform;
+            text-shadow: 0 0 6px #fff, 0 0 2px #b3e0ff;
+            animation: snow-fall-overlay linear forwards;
+        }
+        @keyframes snow-fall-overlay {
+            to {
+                transform: translateY(100%) rotate(360deg);
+                opacity: 0.5;
+            }
+        }
+        /* For containers and buttons: relative positioning for overlay */
+        .theme-snow .container,
+        .theme-snow .btn,
+        .theme-snow .score-section {
+            position: relative;
+            overflow: visible;
+        }
+        /* Bottom snow layer */
+        .bottom-snow-layer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 60px;
+            pointer-events: none;
+            z-index: 120;
+            background: linear-gradient(to top, #fff 80%, rgba(255,255,255,0.0) 100%);
+            opacity: 0.7;
+            display: none;
+        }
+        .theme-snow .bottom-snow-layer {
+            display: block;
+        }
+
+        /* Modern mute toggle button styles */
+        .mute-toggle-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 18px 0 10px 0;
+        }
+        .mute-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            padding: 12px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.18);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+            margin: 0 auto;
+            outline: none;
+            user-select: none;
+        }
+        .mute-toggle-btn.muted {
+            background: linear-gradient(135deg, #b3b3b3, #888);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+        .mute-toggle-btn:active {
+            transform: scale(0.97);
+        }
+        .mute-toggle-btn .icon {
+            margin-right: 8px;
+            font-size: 1.2em;
+            vertical-align: middle;
+        }
     </style>
 </head>
-<body class="theme-modern">
+<body class="theme-snow">
+    <!-- Background music audio tag (muted autoplay hack) -->
+    <audio id="bgMusic" src="game_music.mp3" muted autoplay loop></audio>
     <!-- News Ticker (editable) -->
     <div class="news-ticker" role="region" aria-label="News ticker" aria-live="polite">
         <div class="label">زانیاری</div>
@@ -831,14 +978,21 @@
                     <option value="ku">Kurdish-Sorani</option>
                 </select>
             </div>
-            
             <div class="input-group">
                 <label>Theme:</label>
                 <div class="theme-selector">
                     <div class="theme-btn theme-dark-btn" onclick="changeTheme('dark')" title="Dark Theme"></div>
                     <div class="theme-btn theme-light-btn" onclick="changeTheme('light')" title="Light Theme"></div>
-                    <div class="theme-btn theme-modern-btn active" onclick="changeTheme('modern')" title="Modern Theme"></div>
+                    <div class="theme-btn theme-modern-btn" onclick="changeTheme('modern')" title="Modern Theme"></div>
+                    <div class="theme-btn theme-snow-btn active" onclick="changeTheme('snow')" title="Snow Theme"></div>
                 </div>
+            </div>
+            <!-- Modern mute toggle button, centered -->
+            <div class="mute-toggle-row">
+                <button id="muteToggleBtn" class="mute-toggle-btn" onclick="toggleMute()">
+                    <span class="icon" id="muteIcon">🔊</span>
+                    <span id="muteLabel">بێدەنگ کردن</span>
+                </button>
             </div>
             
             <button class="btn btn-primary" onclick="toggleWordEditor()">Edit Words</button>
@@ -896,6 +1050,13 @@
             -->
             <div id="updatesContent">
                 <h2>_____________________</h2>
+                <h2>وەشانی 1,0,9</h2>
+                <h3>زیادکراوەکان</h3>
+                <ul>
+                    <li>زیادکردی سیمێک بەبۆنەی سەری ساڵی زاینیەوە</li>
+                    <li>زیادکردنی وشەکان لە ( 340 ) وشەوە بۆ زیاتر لە ( 1060 ) وشە</li>
+                    <li>زیادکردنی دوگمەی بێدەنگکردنی گشت سەوتەکان لەناو یاریەکەدا بۆ بەشی ڕێکخستنەکان</li>
+                </ul>
                 <h2>وەشانی 1,0,8</h2>
                 <h3>زیادکراوەکان</h3>
                 <ul>
@@ -981,8 +1142,120 @@
         </div>
     </div>
 
+    <!-- Snow overlay container -->
+    <div class="snow-container" id="snowContainer"></div>
+    <!-- Bottom snow layer -->
+    <div class="bottom-snow-layer"></div>
+
     <script src="wordDatabase.js"></script>
     <script>
+        // --- Mute logic ---
+        let isMuted = false;
+        function setMuteState(mute) {
+            isMuted = mute;
+            // Set audio element mute
+            var bgMusic = document.getElementById('bgMusic');
+            if (bgMusic) bgMusic.muted = mute;
+            // Update toggle button UI
+            var btn = document.getElementById('muteToggleBtn');
+            var icon = document.getElementById('muteIcon');
+            if (btn) {
+                if (mute) {
+                    btn.classList.add('muted');
+                    if (icon) icon.textContent = '🔇';
+                } else {
+                    btn.classList.remove('muted');
+                    if (icon) icon.textContent = '🔊';
+                }
+            }
+            // Persist
+            localStorage.setItem('kurdishImposterMuted', mute ? '1' : '0');
+        }
+        function toggleMute() {
+            setMuteState(!isMuted);
+        }
+        // --- Background music logic (respects mute) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            var bgMusic = document.getElementById('bgMusic');
+            // Restore mute state
+            var savedMute = localStorage.getItem('kurdishImposterMuted');
+            setMuteState(savedMute === '1');
+            if (bgMusic) {
+                bgMusic.muted = isMuted;
+                var playPromise = bgMusic.play();
+                if (playPromise && playPromise.catch) {
+                    playPromise.catch(function(){ /* ignore errors (e.g. user gesture required) */ });
+                }
+            }
+        });
+        (function() {
+            var played = false;
+            function tryPlayMusic() {
+                if (played) return;
+                played = true;
+                var bgMusic = document.getElementById('bgMusic');
+                if (bgMusic) {
+                    bgMusic.muted = isMuted;
+                    var playPromise = bgMusic.play();
+                    if (playPromise && playPromise.catch) {
+                        playPromise.catch(function(){ /* ignore errors */ });
+                    }
+                }
+            }
+            window.addEventListener('click', tryPlayMusic, { once: true, capture: true });
+            window.addEventListener('touchstart', tryPlayMusic, { once: true, capture: true });
+        })();
+        // --- Button sound effects (respect mute) ---
+        function playButtonSound() {
+            if (isMuted) return;
+            // Create a simple click sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Unmute and play background music as soon as possible
+        document.addEventListener('DOMContentLoaded', function() {
+            var bgMusic = document.getElementById('bgMusic');
+            if (bgMusic) {
+                bgMusic.muted = false;
+                var playPromise = bgMusic.play();
+                if (playPromise && playPromise.catch) {
+                    playPromise.catch(function(){ /* ignore errors (e.g. user gesture required) */ });
+                }
+            }
+        });
+
+        // Try to play music on first user interaction if not already playing
+        (function() {
+            var played = false;
+            function tryPlayMusic() {
+                if (played) return;
+                played = true;
+                var bgMusic = document.getElementById('bgMusic');
+                if (bgMusic) {
+                    bgMusic.muted = false;
+                    var playPromise = bgMusic.play();
+                    if (playPromise && playPromise.catch) {
+                        playPromise.catch(function(){ /* ignore errors */ });
+                    }
+                }
+            }
+            window.addEventListener('click', tryPlayMusic, { once: true, capture: true });
+            window.addEventListener('touchstart', tryPlayMusic, { once: true, capture: true });
+        })();
         // Game state
         let gameState = {
             players: 5,
@@ -996,7 +1269,7 @@
         };
 
         // Theme system
-        let currentTheme = 'modern';
+        let currentTheme = 'snow';
         
         // Language system
         let currentLanguage = 'en';
@@ -1042,6 +1315,7 @@
                 moreGames: "More Games",
                 clearAllData: "Clear All Data",
                 about: "About",
+                muteAllSounds: "Mute All Sounds:",
                 
                 // Word Editor
                 wordDatabase: "Word Database",
@@ -1137,6 +1411,7 @@
                 moreGames: "یارییەکانی ترم",
                 clearAllData: "هەموو زانیاریەکان بسڕەوە",
                 about: "دەربارە",
+                muteAllSounds: "دەنگ هەمووی بکوژە:",
                 
                 // Word Editor
                 wordDatabase: "بنکەی زانیاری وشەکان",
@@ -1200,9 +1475,15 @@
             
             // Update active theme button
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.theme-${theme}-btn`).classList.add('active');
-            
+            const btn = document.querySelector(`.theme-${theme}-btn`);
+            if (btn) btn.classList.add('active');
             localStorage.setItem('kurdishImposterTheme', theme);
+            // Snow overlay logic
+            if (theme === 'snow') {
+                startSnow();
+            } else {
+                stopSnow();
+            }
         }
 
         function changeLanguage(language) {
@@ -1211,6 +1492,7 @@
             updateLanguageDisplay();
         }
 
+        // In updateLanguageDisplay, update mute label text
         function updateLanguageDisplay() {
             const t = translations[currentLanguage];
             
@@ -1930,10 +2212,8 @@
                 playerScores: [],
                 roundNumber: 1
             };
-            
-            // Reset theme to default
-            changeTheme('modern');
-            
+            // Always set theme to snow
+            changeTheme('snow');
             showSettings();
             
             // Show success message in a custom way
@@ -1976,6 +2256,7 @@
 
         // Button sound effects
         function playButtonSound() {
+            if (isMuted) return;
             // Create a simple click sound using Web Audio API
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
@@ -2050,12 +2331,113 @@
             });
         }
 
+        // Snow theme: create snowflakes when snow theme is active
+        let snowInterval = null;
+        function startSnow() {
+            const snowContainer = document.getElementById('snowContainer');
+            if (!snowContainer) return;
+            stopSnow();
+            function createSnowflake() {
+                const snowflake = document.createElement('span');
+                snowflake.className = 'snowflake';
+                snowflake.textContent = '❄';
+                const size = Math.random() * 16 + 12;
+                snowflake.style.fontSize = size + 'px';
+                snowflake.style.left = (Math.random() * 100) + 'vw';
+                // Slower: longer animation duration (was 4-6s, now 7-10s)
+                snowflake.style.animationDuration = (Math.random() * 3 + 7) + 's';
+                snowflake.style.opacity = (Math.random() * 0.5 + 0.5).toFixed(2);
+                snowContainer.appendChild(snowflake);
+                setTimeout(() => snowflake.remove(), 12000);
+            }
+            // Slower: create less frequently (was 180ms, now 350ms)
+            snowInterval = setInterval(createSnowflake, 350);
+        }
+        function stopSnow() {
+            if (snowInterval) clearInterval(snowInterval);
+            const snowContainer = document.getElementById('snowContainer');
+            if (snowContainer) snowContainer.innerHTML = '';
+        }
+
+        // Helper: add snow overlay to containers and buttons
+        function addSnowOverlayToElements() {
+            // Remove previous overlays
+            document.querySelectorAll('.snow-overlay').forEach(el => el.remove());
+
+            if (!document.body.classList.contains('theme-snow')) return;
+
+            // Helper to add overlay with animated snowflakes
+            function addOverlay(el, flakeCount = 6) {
+                const overlay = document.createElement('div');
+                overlay.className = 'snow-overlay';
+                for (let i = 0; i < flakeCount; i++) {
+                    const flake = document.createElement('span');
+                    flake.className = 'snowflake';
+                    flake.textContent = '❄';
+                    flake.style.left = (Math.random() * 100) + '%';
+                    flake.style.fontSize = (Math.random() * 8 + 10) + 'px';
+                    flake.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                    flake.style.animationDelay = (Math.random() * 2) + 's';
+                    overlay.appendChild(flake);
+                }
+                el.appendChild(overlay);
+            }
+
+            // Add to all visible containers
+            document.querySelectorAll('.container:visible, .score-section:visible').forEach(el => addOverlay(el, 8));
+            // Add to all visible buttons
+            document.querySelectorAll('.btn:visible').forEach(el => addOverlay(el, 2));
+        }
+
+        // Utility for :visible selector (not natively supported)
+        (function(){
+            if (!Element.prototype.matches) return;
+            if (!('visible' in document.createElement('div'))) {
+                Object.defineProperty(Element.prototype, 'visible', {
+                    get: function() {
+                        return !!(this.offsetWidth || this.offsetHeight || this.getClientRects().length);
+                    }
+                });
+            }
+            // Polyfill for querySelectorAll(':visible')
+            NodeList.prototype.forEach = Array.prototype.forEach;
+            HTMLCollection.prototype.forEach = Array.prototype.forEach;
+            document.querySelectorAllOrig = document.querySelectorAll;
+            document.querySelectorAll = function(sel) {
+                if (sel.includes(':visible')) {
+                    const realSel = sel.replace(':visible', '');
+                    return Array.from(document.querySelectorAllOrig(realSel)).filter(el => el.visible);
+                }
+                return document.querySelectorAllOrig(sel);
+            };
+        })();
+
+        // Patch changeTheme to add overlays when snow is active
+        const origChangeTheme = changeTheme;
+        changeTheme = function(theme) {
+            origChangeTheme(theme);
+            setTimeout(addSnowOverlayToElements, 50);
+        };
+
+        // Also add overlays after DOMContentLoaded and after showing screens
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(addSnowOverlayToElements, 100);
+        });
+        // Patch showScreen to add overlays after screen change
+        const origShowScreen = showScreen;
+        showScreen = function(screenId) {
+            origShowScreen(screenId);
+            setTimeout(addSnowOverlayToElements, 50);
+        };
+
         // Initialize
         function initApp() {
             // Load saved theme
             const savedTheme = localStorage.getItem('kurdishImposterTheme');
             if (savedTheme) {
                 changeTheme(savedTheme);
+            } else {
+                changeTheme('snow');
             }
             
             // Load saved language
@@ -2069,6 +2451,17 @@
             checkSplashImage();
             updatePlayersList();
             addButtonSounds();
+            
+            // Add snow overlay if not present
+            if (!document.getElementById('snowContainer')) {
+                const snowDiv = document.createElement('div');
+                snowDiv.className = 'snow-container';
+                snowDiv.id = 'snowContainer';
+                document.body.appendChild(snowDiv);
+            }
+            
+            // Restore snow if theme is snow
+            if (savedTheme === 'snow') startSnow();
             
             // Show splash screen for 3 seconds
             setTimeout(() => {
@@ -2085,10 +2478,14 @@
             // Default messages: edit window.tickerMessages or call updateTicker([...]) from other code
             window.tickerMessages = window.tickerMessages || [
                 'بەخێربێن بۆ یاری ئیمپۆستەری کوردی',
+                'لەم ئەپدەیتە نوێیەدا زیاتر لە سێ ئەوەندە وشەی نوێ زیاکدراوە',
+                'سیمە نوێکە دەتوانی بێدەنگکەیت لە ڕێکخستنەکانەوە',
                 'لێرەوە ئاگادار ئەبن لەهەرزانیاریەکی تازە لەسەر یاریەکە ، یاخود هەر نوێکردنەوەیەکی تازە هەبێت',
                 'دەتوانیت پەنجە ڕاگریت لەسەر هەواڵەکە و ڕایگریت تا باشتر بتوانیت بیخوێنیتەوە',
                 'داواکاری و پێشنیارەکانت دەتوانیت بنێریت بۆ ئەم ئیمەیڵی دواتر',
-                'didar.baxtear@gmail.com'
+                'didar.baxtear@gmail.com',
+                'ئەگەر توانیت ئەمە بخوێنیتەوە کەوایە پیرۆزە چاوەکانت ئیش ئەکەن',
+                'استخفر الله ,سبحان الله، والحمد لله، و لا إله إلا الله والله أكبر, وحده لا شريك له، له الملك، وله الحمد، وهو على كل شيء قدير'
             ];
 
             function containsArabicChars(s){
