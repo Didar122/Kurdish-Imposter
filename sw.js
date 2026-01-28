@@ -1,51 +1,82 @@
 const CACHE_NAME = 'kurdish-imposter-v1';
-const PRECACHE = [
+const urlsToCache = [
   '/',
   '/index.html',
+  '/manifest.json',
   '/icon.png',
-  '/splash.png',
-  '/wordDatabase.js'
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Noto+Sans+Arabic:wght@400;600;700&display=swap',
+  'https://cdn.tailwindcss.com'
 ];
 
+// Install event - cache assets
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE))
+      .then(cache => {
+        return cache.addAll(urlsToCache).catch(err => {
+          console.log('Some assets failed to cache (this is ok for CDN resources):', err);
+          return cache.addAll(urlsToCache.filter(url => !url.includes('http')));
+        });
+      })
       .then(() => self.skipWaiting())
   );
 });
 
+// Activate event - clean old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-    ))
-    .then(() => self.clients.claim())
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
+// Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') return;
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin) && 
+      !event.request.url.includes('fonts.googleapis.com') &&
+      !event.request.url.includes('cdn.tailwindcss.com')) {
+    return;
+  }
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        // If the response is valid, clone and store it in the cache.
-        if (!response || response.status !== 200) return response;
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          // Avoid caching opaque responses (cross-origin) unnecessarily
-          cache.put(event.request, responseClone).catch(()=>{});
+    caches.match(event.request)
+      .then(response => {
+        // Return cached version if available
+        if (response) {
+          return response;
+        }
+
+        return fetch(event.request).then(response => {
+          // Don't cache non-successful responses
+          if (!response || response.status !== 200 || response.type === 'error') {
+            return response;
+          }
+
+          // Clone the response
+          const responseToCache = response.clone();
+
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+
+          return response;
         });
-        return response;
-      }).catch(() => {
-        // If network fails, try to serve index.html for navigations
+      })
+      .catch(() => {
+        // Offline fallback
         if (event.request.mode === 'navigate') {
           return caches.match('/index.html');
         }
-      });
-    })
+        return new Response('Offline', { status: 503 });
+      })
   );
 });
