@@ -63,10 +63,8 @@
     html, body {
       height: 100%;
       width: 100%;
-    }
-
-    body {
-      font-family: 'Poppins', 'Noto Sans Arabic', sans-serif;
+      margin: 0;
+      padding: 0;
       background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       color: var(--text-primary);
       overflow-x: hidden;
@@ -74,6 +72,23 @@
       padding-bottom: var(--safe-bottom);
       padding-left: var(--safe-left);
       padding-right: var(--safe-right);
+    }
+
+    .app-wrapper {
+      min-height: 100vh; /* Ensure it covers the full viewport height */
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    }
+
+    @supports (height: 100dvh) {
+      html, body {
+        height: 100dvh; /* Use dynamic viewport height to avoid white gaps */
+      }
+      .app-wrapper {
+        min-height: 100dvh;
+      }
     }
 
     body[dir="rtl"] {
