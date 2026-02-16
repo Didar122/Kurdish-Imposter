@@ -2,7 +2,7 @@
   "name": "Kurdish Imposter",
   "short_name": "Imposter",
   "description": "A fun party game to find the imposter",
-  "start_url": "/",
+  "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -31,3 +31,4 @@
     }
   ]
 }
+
